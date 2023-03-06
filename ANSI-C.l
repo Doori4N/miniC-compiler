@@ -1,91 +1,92 @@
 D                       [0-9]
 L                       [a-zA-Z_]
-H                       [a-fA-F0-9]
+/* H                       [a-fA-F0-9]
 E                       [Ee][+-]?{D}+
 FS                      (f|F|l|L)
-IS                      (u|U|l|L)*
+IS                      (u|U|l|L)* */
 
 %{
 #include <stdio.h>
-#include "y.tab.h"
+#include <stdlib.h>
 
+int yylval;
 
-/* Ne gËre pas les commentaires. A rajouter */
+#define BREAK 0
+#define CASE 1
+#define DEFAULT 2
+#define ELSE 3
+#define EXTERN 4
+#define FOR 5
+#define IF 6
+#define INT 7
+#define SWITCH 8
+#define THEN 9
+#define VOID 10
+#define WHILE 11
+#define IDENTIFICATEUR 12
+#define CONSTANTE 13
+
+// #include "y.tab.h"
+
+/* Ne gÔøΩre pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
 
 %}
 
 %%
-"auto"                  { /* A completer */ }
-"break"                 { /* A completer */ }
-"case"                  { /* A completer */ }
-"char"                  { /* A completer */ }
-"const"                 { /* A completer */ }
-"continue"              { /* A completer */ }
-"default"               { /* A completer */ }
-"do"                    { /* A completer */ }
-"double"                { /* A completer */ }
-"else"                  { /* A completer */ }
-"enum"                  { /* A completer */ }
-"extern"                { /* A completer */ }
-"float"                 { /* A completer */ }
-"for"                   { /* A completer */ }
-"goto"                  { /* A completer */ }
-"if"                    { /* A completer */ }
-"int"                   { /* A completer */ }
-"long"                  { /* A completer */ }
-"register"              { /* A completer */ }
-"return"                { /* A completer */ }
-"short"                 { /* A completer */ }
-"signed"                { /* A completer */ }
-"sizeof"                { /* A completer */ }
-"static"                { /* A completer */ }
-"struct"                { /* A completer */ }
-"switch"                { /* A completer */ }
-"typedef"               { /* A completer */ }
-"union"                 { /* A completer */ }
-"unsigned"              { /* A completer */ }
-"void"                  { /* A completer */ }
-"volatile"              { /* A completer */ }
-"while"                 { /* A completer */ }
+"break"                 { return BREAK }
+"case"                  { return CASE }
+"default"               { return DEFAULT }
+"else"                  { return ELSE }
+"extern"                { return EXTERN }
+"for"                   { return FOR }
+"if"                    { return IF }
+"int"                   { return INT }
+"switch"                { return SWITCH }
+"then"                  { return THEN }
+"void"                  { return VOID }
+"while"                 { return WHILE }
 
-{L}({L}|{D})*           { /* A completer */ }
+{L}({L}|{D})*           { return IDENTIFICATEUR }
 
-0[xX]{H}+{IS}?          { /* A completer */ }
-0{D}+{IS}?              { /* A completer */ }
-{D}+{IS}?               { /* A completer */ }
-L?'(\\.|[^\\'])+'       { /* A completer */ }
+/* 0[xX]{H}+{IS}?
+0{D}+{IS}?           
+{D}+{IS}?            
+L?'(\\.|[^\\'])+'    
 
-{D}+{E}{FS}?            { /* A completer */ }
-{D}*"."{D}+({E})?{FS}?  { /* A completer */ }
-{D}+"."{D}*({E})?{FS}?  { /* A completer */ }
+{D}+{E}{FS}?         
 
-L?\"(\\.|[^\\"])*\"     { /* A completer */ }
+L?\"(\\.|[^\\"])*\"   */
+{D}+                    { yylval = atoi(yytext); return CONSTANTE; }
+/* ajouter les commentaires */
 
-"..."                   { /* A completer */ }
-">>="                   { /* A completer */ }
-"<<="                   { /* A completer */ }
-"+="                    { /* A completer */ }
-"-="                    { /* A completer */ }
-"*="                    { /* A completer */ }
-"/="                    { /* A completer */ }
-"%="                    { /* A completer */ }
-"&="                    { /* A completer */ }
-"^="                    { /* A completer */ }
-"|="                    { /* A completer */ }
-">>"                    { /* A completer */ }
-"<<"                    { /* A completer */ }
-"++"                    { /* A completer */ }
-"--"                    { /* A completer */ }
-"->"                    { /* A completer */ }
-"&&"                    { /* A completer */ }
-"||"                    { /* A completer */ }
-"<="                    { /* A completer */ }
-">="                    { /* A completer */ }
-"=="                    { /* A completer */ }
-"!="                    { /* A completer */ }
+"<="                    { return LEQ }
+">="                    { return GEQ }
+"<"                     { return LT }
+">"                     { return GT }
+"=="                    { return EQ }
+"!="                    { return NEQ }
+"!"                     { return NOT }
+"&&"                    { return BAND }
+"||"                    { return BOR }
+"+"                     { return PLUS }
+"-"                     { return MOINS }
+"*"                     { return MUL }
+"/"                     { return DIV }
+"<<"                    { return LSHIFT }
+">>"                    { return RSHIFT }
+"&"                     { return LAND }
+"|"                     { return LOR }
 
 [ \t\v\n\f]             { /* A completer */ }
 .                       { return yytext[0]; }
 %%
-
+int main(){
+    int token_courant=yylex();
+    printf("Codes des tokens retourn√©s par yylex: ");
+    do {
+        printf("%d ", token_courant);
+        token_courant = yylex();
+    }while (token_courant != TOKEN_EOF);
+    return 0;
+}
