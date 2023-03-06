@@ -1,9 +1,7 @@
 D                       [0-9]
 L                       [a-zA-Z_]
-/* H                       [a-fA-F0-9]
+H                       [a-fA-F0-9]
 E                       [Ee][+-]?{D}+
-FS                      (f|F|l|L)
-IS                      (u|U|l|L)* */
 
 %{
 #include <stdio.h>
@@ -48,15 +46,11 @@ int yylval;
 "while"                 { return WHILE }
 
 {L}({L}|{D})*           { return IDENTIFICATEUR }
+      
+L?'(\\.|[^\\'])+'       { /*  */ }
+        
 
-/* 0[xX]{H}+{IS}?
-0{D}+{IS}?           
-{D}+{IS}?            
-L?'(\\.|[^\\'])+'    
-
-{D}+{E}{FS}?         
-
-L?\"(\\.|[^\\"])*\"   */
+L?\"(\\.|[^\\"])*\"  
 {D}+                    { yylval = atoi(yytext); return CONSTANTE; }
 /* ajouter les commentaires */
 
@@ -82,11 +76,15 @@ L?\"(\\.|[^\\"])*\"   */
 .                       { return yytext[0]; }
 %%
 int main(){
-    int token_courant=yylex();
-    printf("Codes des tokens retournés par yylex: ");
-    do {
-        printf("%d ", token_courant);
-        token_courant = yylex();
-    }while (token_courant != TOKEN_EOF);
+    int token_courant;
+    while (1){
+        token_courant=yylex();
+        if (token_courant == 13){
+            printf("token: %d, valeur de la constante : %d", token_courant, yylval);
+        }
+        else{
+            printf("%d ", token_courant);
+        }
+    };
     return 0;
 }
