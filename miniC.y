@@ -133,3 +133,11 @@ binary_comp	:
 	|	NEQ
 ;
 %%
+int yyerror(char *s){
+    fprintf(stderr, "%s\n", s);
+    exit(1); //le programme s'arrete lors d'une erreur de syntaxe
+}
+int main(){
+    yyparse();
+    return 0;
+}

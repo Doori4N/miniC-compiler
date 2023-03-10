@@ -4,25 +4,8 @@ L                       [a-zA-Z_]
 %{
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "y.tab.h"
 int yylval;
-
-#define BREAK 0
-#define CASE 1
-#define DEFAULT 2
-#define ELSE 3
-#define EXTERN 4
-#define FOR 5
-#define IF 6
-#define INT 7
-#define SWITCH 8
-#define THEN 9
-#define VOID 10
-#define WHILE 11
-#define IDENTIFICATEUR 12
-#define CONSTANTE 13
-
-// #include "y.tab.h"
 
 /* Ne g�re pas les commentaires. A rajouter */
 /* Supprimer les lignes dont vous n'avez pas besoin. */
@@ -45,12 +28,7 @@ int yylval;
 
 {L}({L}|{D})*           { return IDENTIFICATEUR }
       
-L?'(\\.|[^\\'])+'       { /*  */ }
-        
-
-L?\"(\\.|[^\\"])*\"  
 {D}+                    { yylval = atoi(yytext); return CONSTANTE; }
-/* ajouter les commentaires */
 
 "<="                    { return LEQ }
 ">="                    { return GEQ }
@@ -70,7 +48,7 @@ L?\"(\\.|[^\\"])*\"
 "&"                     { return LAND }
 "|"                     { return LOR }
 
-[ \t\v\n\f]             { /* A completer */ }
+[ \t\v\n\f]             ;
 .                       { return yytext[0]; }
 %%
 int main(){
