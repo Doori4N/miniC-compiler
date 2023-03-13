@@ -1,6 +1,6 @@
 D                       [0-9]
 L                       [a-zA-Z_]
-
+%option noyywrap
 %{
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,45 +13,45 @@ int yylval;
 %}
 
 %%
-"break"                 { return BREAK }
-"case"                  { return CASE }
-"default"               { return DEFAULT }
-"else"                  { return ELSE }
-"extern"                { return EXTERN }
-"for"                   { return FOR }
-"if"                    { return IF }
-"int"                   { return INT }
-"switch"                { return SWITCH }
-"then"                  { return THEN }
-"void"                  { return VOID }
-"while"                 { return WHILE }
+"break"                 { return BREAK; }
+"case"                  { return CASE; }
+"default"               { return DEFAULT; }
+"else"                  { return ELSE; }
+"extern"                { return EXTERN; }
+"for"                   { return FOR; }
+"if"                    { return IF; }
+"int"                   { return INT; }
+"switch"                { return SWITCH; }
+"then"                  { return THEN; }
+"void"                  { return VOID; }
+"while"                 { return WHILE; }
 
-{L}({L}|{D})*           { return IDENTIFICATEUR }
+{L}({L}|{D})*           { return IDENTIFICATEUR; }
       
 {D}+                    { yylval = atoi(yytext); return CONSTANTE; }
 
-"<="                    { return LEQ }
-">="                    { return GEQ }
-"<"                     { return LT }
-">"                     { return GT }
-"=="                    { return EQ }
-"!="                    { return NEQ }
-"!"                     { return NOT }
-"&&"                    { return BAND }
-"||"                    { return BOR }
-"+"                     { return PLUS }
-"-"                     { return MOINS }
-"*"                     { return MUL }
-"/"                     { return DIV }
-"<<"                    { return LSHIFT }
-">>"                    { return RSHIFT }
-"&"                     { return LAND }
-"|"                     { return LOR }
+"<="                    { return LEQ; }
+">="                    { return GEQ; }
+"<"                     { return LT; }
+">"                     { return GT; }
+"=="                    { return EQ; }
+"!="                    { return NEQ; }
+"!"                     { return NOT; }
+"&&"                    { return BAND; }
+"||"                    { return BOR; }
+"+"                     { return PLUS; }
+"-"                     { return MOINS; }
+"*"                     { return MUL; }
+"/"                     { return DIV; }
+"<<"                    { return LSHIFT; }
+">>"                    { return RSHIFT; }
+"&"                     { return LAND; }
+"|"                     { return LOR; }
 
 [ \t\v\n\f]             ;
 .                       { return yytext[0]; }
 %%
-int main(){
+/* int main(){
     int token_courant;
     while (1){
         token_courant=yylex();
@@ -63,4 +63,4 @@ int main(){
         }
     };
     return 0;
-}
+} */

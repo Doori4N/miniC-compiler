@@ -1,4 +1,8 @@
 %{
+	#include <stdio.h>
+    #include <stdlib.h>
+    int yylex();
+    int yyerror(char *s);
 %}
 %token IDENTIFICATEUR CONSTANTE VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
 %token BREAK RETURN PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR LAND LOR LT GT 
