@@ -19,126 +19,130 @@
 %start programme
 %%
 programme	:	
-		liste_declarations liste_fonctions
+ 		liste_declarations liste_fonctions
 ;
 liste_declarations	:	
 		liste_declarations declaration 
-	|	
+ 	|	
 ;
 liste_fonctions	:	
-		liste_fonctions fonction
-	|   
+ 		liste_fonctions fonction
+ 	|   fonction
 ;
 declaration	:	
-		INT liste_declarateurs ';'
+ 		type liste_declarateurs ';'
 ;
 liste_declarateurs	:	
-		liste_declarateurs ',' declarateur
-	|	declarateur
+ 		liste_declarateurs ',' declarateur
+ 	|	declarateur
 ;
-declarateur	:	
-		IDENTIFICATEUR
-	|	declarateur '[' CONSTANTE ']'
+declarateur		:	
+ 		IDENTIFICATEUR
+ 	|	declarateur '[' CONSTANTE ']'
 ;
-fonction	:	
-		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}'
-	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';'
+fonction		:	
+ 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}'
+ 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';'
 ;
 type	:	
-		VOID
-	|	INT
+ 		VOID
+ 	|	INT
 ;
-liste_parms	:	
-		l_parms
-	|	
+liste_parms		:	
+ 		l_parms
+ 	|	
 ;
-l_parms : 
+l_parms		:
 		parm
-	| 	l_parms ',' parm
+	|	l_parms ',' parm
 ;
 parm	:	
-		INT IDENTIFICATEUR
+ 		INT IDENTIFICATEUR
 ;
 liste_instructions :	
-		liste_instructions instruction
-	|
+ 		liste_instructions instruction
+ 	|
 ;
 instruction	:	
-		iteration
-	|	selection
-	|	saut
-	|	affectation ';'
-	|	bloc
-	|	appel
+ 		iteration
+ 	|	selection
+ 	|	saut
+ 	|	affectation ';'
+ 	|	bloc
+ 	|	appel
 ;
 iteration	:	
-		FOR '(' affectation ';' condition ';' affectation ')' instruction
-	|	WHILE '(' condition ')' instruction
+ 		FOR '(' affectation ';' condition ';' affectation ')' instruction
+ 	|	WHILE '(' condition ')' instruction
 ;
 selection	:	
-		IF '(' condition ')' instruction %prec THEN
-	|	IF '(' condition ')' instruction ELSE instruction
-	|	SWITCH '(' expression ')' instruction
-	|	CASE CONSTANTE ':' instruction
-	|	DEFAULT ':' instruction
+ 		IF '(' condition ')' instruction %prec THEN
+ 	|	IF '(' condition ')' instruction ELSE instruction
+ 	|	SWITCH '(' expression ')' instruction
+ 	|	CASE CONSTANTE ':' instruction
+ 	|	DEFAULT ':' instruction
 ;
 saut	:	
-		BREAK ';'
-	|	RETURN ';'
-	|	RETURN expression ';'
+ 		BREAK ';'
+ 	|	RETURN ';'
+ 	|	RETURN expression ';'
 ;
 affectation	:	
-		variable '=' expression
+ 		variable '=' expression
 ;
 bloc	:	
-		'{' liste_declarations liste_instructions '}'
+ 		'{' liste_declarations liste_instructions '}'
 ;
 appel	:	
-		IDENTIFICATEUR '(' liste_expressions ')' ';'
+ 		IDENTIFICATEUR '(' liste_expressions ')' ';'
 ;
 variable	:	
-		IDENTIFICATEUR
-	|	variable '[' expression ']'
+ 		IDENTIFICATEUR
+ 	|	variable '[' expression ']'
 ;
 expression	:	
-		'(' expression ')'
-	|	expression binary_op expression %prec OP
-	|	MOINS expression
-	|	CONSTANTE
-	|	variable
-	|	IDENTIFICATEUR '(' liste_expressions ')'
+ 		'(' expression ')'
+ 	|	expression binary_op expression %prec OP
+ 	|	MOINS expression
+ 	|	CONSTANTE
+ 	|	variable
+ 	|	IDENTIFICATEUR '(' liste_expressions ')'
 ;
 liste_expressions	:	
-		liste_expressions ',' expression
-	|
+ 		l_expressions
+ 	|	
+;
+l_expressions		:
+		expression
+	|	l_expressions ',' expression
 ;
 condition	:	
-		NOT '(' condition ')'
-	|	condition binary_rel condition %prec REL
-	|	'(' condition ')'
-	|	expression binary_comp expression
+ 		NOT '(' condition ')'
+ 	|	condition binary_rel condition %prec REL
+ 	|	'(' condition ')'
+ 	|	expression binary_comp expression
 ;
 binary_op	:	
-		PLUS
-	|       MOINS
-	|	MUL
-	|	DIV
-	|       LSHIFT
-	|       RSHIFT
-	|	BAND
-	|	BOR
+ 		PLUS
+ 	|       MOINS
+ 	|	MUL
+ 	|	DIV
+ 	|       LSHIFT
+ 	|       RSHIFT
+ 	|	BAND
+ 	|	BOR
 ;
 binary_rel	:	
-		LAND
-	|	LOR
+ 		LAND
+ 	|	LOR
 ;
 binary_comp	:	
-		LT
-	|	GT
-	|	GEQ
-	|	LEQ
-	|	EQ
-	|	NEQ
+ 		LT
+ 	|	GT
+ 	|	GEQ
+ 	|	LEQ
+ 	|	EQ
+ 	|	NEQ
 ;
 %%
 int yyerror(char *s){
