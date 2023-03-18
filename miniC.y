@@ -27,10 +27,10 @@ liste_declarations	:
 ;
 liste_fonctions	:	
 		liste_fonctions fonction
-|               fonction
+	|   
 ;
 declaration	:	
-		type liste_declarateurs ';'
+		INT liste_declarateurs ';'
 ;
 liste_declarateurs	:	
 		liste_declarateurs ',' declarateur
@@ -49,8 +49,12 @@ type	:
 	|	INT
 ;
 liste_parms	:	
-		liste_parms ',' parm
+		l_parms
 	|	
+;
+l_parms : 
+		parm
+	| 	l_parms ',' parm
 ;
 parm	:	
 		INT IDENTIFICATEUR
