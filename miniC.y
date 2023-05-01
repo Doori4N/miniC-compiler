@@ -3,7 +3,9 @@
     #include <stdlib.h>
     int yylex();
     int yyerror(char *s);
+	extern int yylineno;
 %}
+
 %token IDENTIFICATEUR CONSTANTE VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
 %token BREAK RETURN PLUS MOINS MUL DIV LSHIFT RSHIFT BAND BOR LAND LOR LT GT 
 %token GEQ LEQ EQ NEQ NOT EXTERN
@@ -17,6 +19,7 @@
 %left OP
 %left REL
 %start programme
+
 %%
 programme	:	
  		liste_declarations liste_fonctions
@@ -88,7 +91,7 @@ saut	:
  	|	RETURN expression ';'
 ;
 affectation	:	
- 		variable '=' expression
+ 		variable '=' expression 
 ;
 bloc	:	
  		'{' liste_declarations liste_instructions '}'
@@ -145,8 +148,9 @@ binary_comp	:
  	|	NEQ
 ;
 %%
+
 int yyerror(char *s){
-    fprintf(stderr, "%s\n", s);
+    fprintf(stderr, "%s ligne :  %d \n", s, yylineno);
     exit(1); //le programme s'arrete lors d'une erreur de syntaxe
 }
 int main(){

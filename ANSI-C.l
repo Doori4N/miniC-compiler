@@ -1,12 +1,14 @@
 D                       [0-9]
 L                       [a-zA-Z_]
 C                       \/\*(.|[\n\t\r])*\*\/
+
 %option noyywrap
+%option yylineno
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include "y.tab.h"
-int yylval;
+
 // #define TOKEN_EOF 0
 // #define BREAK 1
 // #define CASE 2
@@ -62,7 +64,7 @@ int yylval;
 
 {L}({L}|{D})*           { return IDENTIFICATEUR; }
       
-{D}+                    { yylval = atoi(yytext); return CONSTANTE; }
+{D}+                    { int yylval = atoi(yytext); return CONSTANTE; }
 
 "<="                    { return LEQ; }
 ">="                    { return GEQ; }
