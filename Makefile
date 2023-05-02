@@ -1,5 +1,5 @@
 TESTS_DIR := Tests
-TESTS := $(wildcard $(TESTS_DIR)/*)
+TESTS := $(wildcard $(TESTS_DIR)/*.c)
 
 all: miniC
 
@@ -20,3 +20,4 @@ test: miniC
 
 clean:
 	rm -f lex.yy.c y.tab.c y.tab.h miniC
+	clear

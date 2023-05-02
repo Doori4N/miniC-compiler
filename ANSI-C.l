@@ -8,7 +8,7 @@ C                       \/\*(.|[\n\t\r])*\*\/
 #include <stdio.h>
 #include <stdlib.h>
 #include "y.tab.h"
-
+//#include "table_symbole.h"
 // #define TOKEN_EOF 0
 // #define BREAK 1
 // #define CASE 2
@@ -62,7 +62,7 @@ C                       \/\*(.|[\n\t\r])*\*\/
 "void"                  { return VOID; }
 "while"                 { return WHILE; }
 
-{L}({L}|{D})*           { return IDENTIFICATEUR; }
+{L}({L}|{D})*           {yylval.str = yytext ;return IDENTIFICATEUR; }
       
 {D}+                    { int yylval = atoi(yytext); return CONSTANTE; }
 
