@@ -27,11 +27,15 @@ typedef struct stack{
     struct stack* next;
 } TableStack;
 
-Node* createNode(char* nom);
+Node* createNode(char* name, type_s type, symbol_struct* s_struct);
 Node* addNode(Node* node1, Node* node2);
 
 TableStack* initTable();
 void push(TableStack* stack);
+
+symbol_struct* createFunStruct(type_t type, Node* node);
+
+int len(Node* node);
 
 // TableStack createTableStack();
 // Symbole* searchSymbole(TableStack* table, char* nom);
@@ -44,3 +48,4 @@ void push(TableStack* stack);
 //FONCTIONS POUR DEBUG
 void printNode(Node* node);
 void printStack(TableStack* stack);
+void printStruct(symbol_struct* s_struct, type_s type);

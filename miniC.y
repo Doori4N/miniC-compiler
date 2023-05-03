@@ -14,6 +14,7 @@
 	int val;
 	Node* node;
 	TableStack* stack;
+	type_t type;
 }
 
 %token <str> IDENTIFICATEUR CONSTANTE VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
@@ -32,13 +33,14 @@
 
 %start programme
 
+%type <type> type
 %type <stack> liste_declarations
-%type <node> declarateur liste_declarateurs declaration
-%type <str> binary_rel binary_comp binary_op type liste_parms l_parms parm liste_instructions instruction iteration selection saut affectation bloc appel variable expression liste_expressions condition liste_fonctions fonction
+%type <node> declarateur liste_declarateurs declaration fonction parm l_parms liste_parms liste_fonctions
+%type <str> binary_rel binary_comp binary_op liste_instructions instruction iteration selection saut affectation bloc appel variable expression liste_expressions condition 
 
 %%
 programme	:	
- 		liste_declarations liste_fonctions { printStack(top); }
+ 		liste_declarations liste_fonctions { $1->node = addNode($1->node, $2); printStack(top); }
 ;
 liste_declarations	:	
 		liste_declarations declaration {
@@ -54,12 +56,12 @@ liste_declarations	:
 		}
 ;
 liste_fonctions	:	
- 		liste_fonctions fonction
- 	|   fonction	
+ 		liste_fonctions fonction { $$ = addNode($1, $2); }
+ 	|   fonction { $$ = $1; }
 ;
 declaration	:	
  		type liste_declarateurs ';' {
-			if(!strcmp($1, "VOID")){
+			if($1 == TYPE_VOID){
 				yyerror("Error! bad type for variable : VOID");
 			}else{
 				$$ = $2;
@@ -74,27 +76,29 @@ liste_declarateurs	:
  	|	declarateur { $$ = $1; }
 ;
 declarateur		:	
- 		IDENTIFICATEUR { $$ = createNode($1); }
+ 		IDENTIFICATEUR { $$ = createNode($1, TYPE_VAR, NULL); }
  	|	declarateur '[' CONSTANTE ']'
 ;
 fonction		:	
- 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' 
- 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' 
+ 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' { 
+			$$ = createNode($2, TYPE_FUN, createFunStruct($1, $4)); 
+		}
+ 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' { $$ = createNode($3, TYPE_FUN, createFunStruct($2, $5)); }
 ;
 type	:	
- 		VOID { $$ = "VOID"; }
- 	|	INT { $$ = "INT"; }
+ 		VOID { $$ = TYPE_VOID; }
+ 	|	INT { $$ = TYPE_INT; }
 ;
 liste_parms		:	
- 		l_parms	
- 	|		
+ 		l_parms	{ $$ = $1; }
+ 	|	{ $$ = NULL; }
 ;
 l_parms		:
-		parm	
-	|	l_parms ',' parm	
+		l_parms ',' parm { $$ = addNode($1, $3); }
+	|	parm { $$ = $1; }
 ;
 parm	:	
- 		INT IDENTIFICATEUR	
+ 		INT IDENTIFICATEUR { $$ = createNode($2, TYPE_VAR, NULL); }
 ;
 liste_instructions :	
  		liste_instructions instruction
@@ -192,13 +196,21 @@ int main(){
     return 0;
 }
 
-Node* createNode(char* name){
+Node* createNode(char* name, type_s type, symbol_struct* s_struct){
 	Node* node = (Node*) malloc(sizeof(Node));
 	node->name = name;
-	node->type = TYPE_VAR;
-	node->s_struct = NULL;
+	node->type = type;
+	node->s_struct = s_struct;	
 	node->next = NULL;
 	return node;
+}
+
+symbol_struct* createFunStruct(type_t type, Node* node){
+	symbol_struct* s_struct = (symbol_struct*) malloc(sizeof(symbol_struct));
+	s_struct->function = (symbol_function*) malloc(sizeof(symbol_function));
+	s_struct->function->nb_param = len(node);
+	s_struct->function->type = type;
+	return s_struct;
 }
 
 Node* addNode(Node* node1, Node* node2){
@@ -231,15 +243,33 @@ void push(TableStack* stack){
 	top = stack;
 }
 
+int len(Node* node){
+	int length = 0;
+	Node* temp_node = node;
+	while(temp_node != NULL){
+		length++;
+		temp_node = temp_node->next;
+	}
+	return length;
+}
+
 //-------------FONCTIONS POUR DEBUG------------
+
+void printStruct(symbol_struct* s_struct, type_s type){
+	if(type == TYPE_FUN){
+		printf("{nb_param: %d, type: %d} ", s_struct->function->nb_param, s_struct->function->type);
+	}
+}
 
 void printNode(Node* node){
 	if (node){
-		char* s = "NULL";
+		printf("node : {name: %s, type: %d, s_struct: ", node->name, node->type);
 		if (node->s_struct){
-			//changer s
+			printStruct(node->s_struct, node->type);
+		}else{
+			printf("NULL, ");
 		}
-		printf("node : {name: %s, type: %d, s_struct: %s next: ", node->name, node->type, s);
+		printf("next: ");
 		if (node->next == NULL){
 			printf("NULL}\n");
 		}else{
