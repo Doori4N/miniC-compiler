@@ -32,6 +32,7 @@ Node* addNode(Node* node1, Node* node2);
 
 TableStack* initTable();
 void push(TableStack* stack);
+void pop();
 
 symbol_struct* createFunStruct(type_t type, Node* node);
 

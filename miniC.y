@@ -34,25 +34,22 @@
 %start programme
 
 %type <type> type
-%type <stack> liste_declarations
-%type <node> declarateur liste_declarateurs declaration fonction parm l_parms liste_parms liste_fonctions
+%type <stack> liste_declarations liste_parms
+%type <node> declarateur liste_declarateurs declaration fonction parm l_parms liste_fonctions
 %type <str> binary_rel binary_comp binary_op liste_instructions instruction iteration selection saut affectation bloc appel variable expression liste_expressions condition 
 
 %%
 programme	:	
- 		liste_declarations liste_fonctions { $1->node = addNode($1->node, $2); printStack(top); }
+ 		liste_declarations liste_fonctions { $1->node = addNode($1->node, $2); printStack(top);}
 ;
 liste_declarations	:	
 		liste_declarations declaration {
-			//Ajoute la/les node(s) à la table de symboles 
-			$1->node = addNode($1->node, $2);
+			$1->node = addNode($1->node, $2);//Ajoute la/les node(s) à la table de symboles 
 			$$ = $1;
 		}
  	|	{
-			//Initialise une table de symboles
-			$$ = initTable();
-			//Ajoute la table à la pile
-			push($$);
+			$$ = initTable();//Initialise une table de symboles
+			push($$);//Ajoute la table à la pile
 		}
 ;
 liste_fonctions	:	
@@ -70,28 +67,39 @@ declaration	:
 ;
 liste_declarateurs	:	
  		liste_declarateurs ',' declarateur {
-			//ajoute une node à la liste
-			$$ = addNode($1, $3);
+			$$ = addNode($1, $3); //ajoute une node à la liste
 		}
  	|	declarateur { $$ = $1; }
 ;
 declarateur		:	
  		IDENTIFICATEUR { $$ = createNode($1, TYPE_VAR, NULL); }
- 	|	declarateur '[' CONSTANTE ']'
+ 	|	declarateur '[' CONSTANTE ']' 
 ;
 fonction		:	
  		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' { 
-			$$ = createNode($2, TYPE_FUN, createFunStruct($1, $4)); 
+			$$ = createNode($2, TYPE_FUN, createFunStruct($1, $4->node)); //ajoute la fonction à la liste du bloc parent
+			pop();//supprime la table de symbole en haut de la pile
+			pop();
 		}
- 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' { $$ = createNode($3, TYPE_FUN, createFunStruct($2, $5)); }
+ 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' { 
+			$$ = createNode($3, TYPE_FUN, createFunStruct($2, $5->node)); 
+			pop();
+		}
 ;
 type	:	
  		VOID { $$ = TYPE_VOID; }
  	|	INT { $$ = TYPE_INT; }
 ;
 liste_parms		:	
- 		l_parms	{ $$ = $1; }
- 	|	{ $$ = NULL; }
+ 		l_parms	{ 
+			$$ = initTable();//Initialise une table de symboles
+			$$->node = $1;
+			push($$);//Ajoute la table à la pile
+		}
+ 	|	{ 
+			$$ = initTable(); 
+			push($$);
+		}
 ;
 l_parms		:
 		l_parms ',' parm { $$ = addNode($1, $3); }
@@ -117,7 +125,7 @@ iteration	:
  	|	WHILE '(' condition ')' instruction
 ;
 selection	:	
- 		IF '(' condition ')' instruction %prec THEN
+ 		IF '(' condition ')' instruction %prec THEN 
  	|	IF '(' condition ')' instruction ELSE instruction
  	|	SWITCH '(' expression ')' instruction
  	|	CASE CONSTANTE ':' instruction
@@ -132,7 +140,7 @@ affectation	:
  		variable '=' expression 
 ;
 bloc	:	
- 		'{' liste_declarations liste_instructions '}'
+ 		'{' liste_declarations liste_instructions '}' { pop(); }
 ;
 appel	:	
  		IDENTIFICATEUR '(' liste_expressions ')' ';'
@@ -219,10 +227,8 @@ Node* addNode(Node* node1, Node* node2){
 	}
 	else{
 		Node* temp_node = node1;
-		Node* curr_node = node1;
-		while(curr_node != NULL){
-			temp_node = curr_node;
-			curr_node = temp_node->next;
+		while(temp_node->next != NULL){
+			temp_node = temp_node->next;
 		}
 		temp_node->next = node2;
 		return node1;
@@ -241,6 +247,14 @@ void push(TableStack* stack){
 		stack->next = top;
 	}
 	top = stack;
+}
+
+void pop(){
+	TableStack* temp_stack = top;
+	if(top){
+		top = top->next;
+	}
+	free(temp_stack);
 }
 
 int len(Node* node){
