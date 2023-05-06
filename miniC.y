@@ -38,7 +38,7 @@
 
 %%
 programme	:	
- 		liste_declarations liste_fonctions { printStack(top); }
+ 		liste_declarations liste_fonctions { printStack(top); freeStack(top); }
 ;
 liste_declarations	:	
 		liste_declarations declaration {
@@ -187,6 +187,7 @@ int yyerror(char *s){
     fprintf(stderr, "%s, ligne : %d \n", s, yylineno);
     exit(1); //le programme s'arrete lors d'une erreur de syntaxe
 }
+
 int main(){
     yyparse();
     return 0;
@@ -200,6 +201,42 @@ Node* createNode(char* name){
 	node->next = NULL;
 	return node;
 }
+
+void freeStack(){
+	while(top != NULL){
+		freeNodes(top->node);
+		top = top->next;
+	}
+}
+
+void freeNodes(Node* node1) {
+    while(node1 != NULL) {
+        Node* temp = node1;
+        node1 = node1->next;
+        printf("free de : %s\n", temp->name);
+        free(temp->name);
+		
+        if(temp->s_struct := NULL) { 
+			printf("type : %d\n", temp->type);
+            switch(temp->type) {
+                case TYPE_ARR:
+                    free(temp->s_struct->array->dimensions); 
+                    free(temp->s_struct->array); 
+                    break;
+                case TYPE_FUN:
+                    free(temp->s_struct->function);
+                    break;
+                default:
+					printf("Erreur de type !\n")
+                    break;
+            }
+            free(temp->s_struct);
+        }
+        
+        free(temp);
+    }
+}
+
 
 Node* addNode(Node* node1, Node* node2){
 	if (node1 == NULL){
