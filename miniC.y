@@ -40,7 +40,7 @@
 
 %%
 programme	:	
- 		liste_declarations liste_fonctions { printStack(top); freeStack(top); }
+ 		liste_declarations liste_fonctions { printStack(top); freeStack(); printStack(top); }
 ;
 liste_declarations	:	
 		liste_declarations declaration {
@@ -143,7 +143,7 @@ bloc	:
  		'{' liste_declarations liste_instructions '}' { pop(); }
 ;
 appel	:	
- 		IDENTIFICATEUR '(' liste_expressions ')' ';'
+ 		IDENTIFICATEUR '(' liste_expressions ')' ';' { }
 ;
 variable	:	
  		IDENTIFICATEUR
@@ -222,10 +222,19 @@ symbol_struct* createFunStruct(type_t type, Node* node){
 	return s_struct;
 }
 
+//Libère la mémoire attribuée a un node
+void freeOneStack(TableStack* stack){
+	freeNodes(stack->node);
+	free(stack);
+}
+
+//libere toute la pile
 void freeStack(){
+	TableStack* temp;
 	while(top != NULL){
-		freeNodes(top->node);
-		top = top->next;
+		temp = top->next;//garde en memoire la table suivante
+		freeOneStack(top);//supprime le sommet de la pile
+		top = temp;
 	}
 }
 
@@ -236,18 +245,20 @@ void freeNodes(Node* node1) {
         printf("free de : %s\n", temp->name);
         free(temp->name);
 		
-        if(temp->s_struct := NULL) { 
+        if(temp->s_struct != NULL) { 
 			printf("type : %d\n", temp->type);
             switch(temp->type) {
                 case TYPE_ARR:
+					printf("Free du tableau\n");
                     free(temp->s_struct->array->dimensions); 
                     free(temp->s_struct->array); 
                     break;
                 case TYPE_FUN:
+					printf("Free de la fonction\n");
                     free(temp->s_struct->function);
                     break;
                 default:
-					printf("Erreur de type !\n")
+					printf("Erreur de type !\n");
                     break;
             }
             free(temp->s_struct);
@@ -291,7 +302,7 @@ void pop(){
 	if(top){
 		top = top->next;
 	}
-	free(temp_stack);
+	freeOneStack(temp_stack);
 }
 
 int len(Node* node){

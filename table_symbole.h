@@ -38,6 +38,9 @@ symbol_struct* createFunStruct(type_t type, Node* node);
 
 int len(Node* node);
 
+void freeNodes(Node* node);
+void freeStack();
+void freeOneStack(TableStack* stack);
 // TableStack createTableStack();
 // Symbole* searchSymbole(TableStack* table, char* nom);
 // Symbole* createSymbole(type_t type, value val);
