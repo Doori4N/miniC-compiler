@@ -40,7 +40,7 @@
 
 %%
 programme	:	
- 		liste_declarations liste_fonctions { $1->node = addNode($1->node, $2); printStack(top);}
+ 		liste_declarations liste_fonctions { printStack(top); }
 ;
 liste_declarations	:	
 		liste_declarations declaration {
@@ -53,8 +53,8 @@ liste_declarations	:
 		}
 ;
 liste_fonctions	:	
- 		liste_fonctions fonction { $$ = addNode($1, $2); }
- 	|   fonction { $$ = $1; }
+ 		liste_fonctions fonction { }
+ 	|   fonction { }
 ;
 declaration	:	
  		type liste_declarateurs ';' {
@@ -77,13 +77,13 @@ declarateur		:
 ;
 fonction		:	
  		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' { 
-			$$ = createNode($2, TYPE_FUN, createFunStruct($1, $4->node)); //ajoute la fonction à la liste du bloc parent
 			pop();//supprime la table de symbole en haut de la pile
-			pop();
+			pop();//supprime le sommet de la pile (liste_parms)
+			top->node = addNode(createNode($2, TYPE_FUN, createFunStruct($1, $4->node)), top->node); //ajoute la fonction à la liste du bloc parent
 		}
  	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' { 
-			$$ = createNode($3, TYPE_FUN, createFunStruct($2, $5->node)); 
-			pop();
+			pop();//supprime le sommet de la pile (liste_parms)
+			top->node = addNode(createNode($3, TYPE_FUN, createFunStruct($2, $5->node)), top->node); //ajoute la node au sommet de la stack
 		}
 ;
 type	:	
@@ -267,7 +267,7 @@ int len(Node* node){
 	return length;
 }
 
-//-------------FONCTIONS POUR DEBUG------------
+//-------------FONCTIONS POUR DEBUG--------------
 
 void printStruct(symbol_struct* s_struct, type_s type){
 	if(type == TYPE_FUN){
