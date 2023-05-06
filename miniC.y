@@ -14,6 +14,7 @@
 	int val;
 	Node* node;
 	TableStack* stack;
+	type_t type;
 }
 
 %token <str> IDENTIFICATEUR CONSTANTE VOID INT FOR WHILE IF ELSE SWITCH CASE DEFAULT
@@ -32,9 +33,10 @@
 
 %start programme
 
-%type <stack> liste_declarations
-%type <node> declarateur liste_declarateurs declaration
-%type <str> binary_rel binary_comp binary_op type liste_parms l_parms parm liste_instructions instruction iteration selection saut affectation bloc appel variable expression liste_expressions condition liste_fonctions fonction
+%type <type> type
+%type <stack> liste_declarations liste_parms
+%type <node> declarateur liste_declarateurs declaration fonction parm l_parms liste_fonctions
+%type <str> binary_rel binary_comp binary_op liste_instructions instruction iteration selection saut affectation bloc appel variable expression liste_expressions condition 
 
 %%
 programme	:	
@@ -42,24 +44,21 @@ programme	:
 ;
 liste_declarations	:	
 		liste_declarations declaration {
-			//Ajoute la/les node(s) à la table de symboles 
-			$1->node = addNode($1->node, $2);
+			$1->node = addNode($1->node, $2);//Ajoute la/les node(s) à la table de symboles 
 			$$ = $1;
 		}
  	|	{
-			//Initialise une table de symboles
-			$$ = initTable();
-			//Ajoute la table à la pile
-			push($$);
+			$$ = initTable();//Initialise une table de symboles
+			push($$);//Ajoute la table à la pile
 		}
 ;
 liste_fonctions	:	
- 		liste_fonctions fonction
- 	|   fonction	
+ 		liste_fonctions fonction { }
+ 	|   fonction { }
 ;
 declaration	:	
  		type liste_declarateurs ';' {
-			if(!strcmp($1, "VOID")){
+			if($1 == TYPE_VOID){
 				yyerror("Error! bad type for variable : VOID");
 			}else{
 				$$ = $2;
@@ -68,33 +67,46 @@ declaration	:
 ;
 liste_declarateurs	:	
  		liste_declarateurs ',' declarateur {
-			//ajoute une node à la liste
-			$$ = addNode($1, $3);
+			$$ = addNode($1, $3); //ajoute une node à la liste
 		}
  	|	declarateur { $$ = $1; }
 ;
 declarateur		:	
- 		IDENTIFICATEUR { $$ = createNode($1); }
- 	|	declarateur '[' CONSTANTE ']'
+ 		IDENTIFICATEUR { $$ = createNode($1, TYPE_VAR, NULL); }
+ 	|	declarateur '[' CONSTANTE ']' 
 ;
 fonction		:	
- 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' 
- 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' 
+ 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' { 
+			pop();//supprime la table de symbole en haut de la pile
+			pop();//supprime le sommet de la pile (liste_parms)
+			top->node = addNode(createNode($2, TYPE_FUN, createFunStruct($1, $4->node)), top->node); //ajoute la fonction à la liste du bloc parent
+		}
+ 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' { 
+			pop();//supprime le sommet de la pile (liste_parms)
+			top->node = addNode(createNode($3, TYPE_FUN, createFunStruct($2, $5->node)), top->node); //ajoute la node au sommet de la stack
+		}
 ;
 type	:	
- 		VOID { $$ = "VOID"; }
- 	|	INT { $$ = "INT"; }
+ 		VOID { $$ = TYPE_VOID; }
+ 	|	INT { $$ = TYPE_INT; }
 ;
 liste_parms		:	
- 		l_parms	
- 	|		
+ 		l_parms	{ 
+			$$ = initTable();//Initialise une table de symboles
+			$$->node = $1;
+			push($$);//Ajoute la table à la pile
+		}
+ 	|	{ 
+			$$ = initTable(); 
+			push($$);
+		}
 ;
 l_parms		:
-		parm	
-	|	l_parms ',' parm	
+		l_parms ',' parm { $$ = addNode($1, $3); }
+	|	parm { $$ = $1; }
 ;
 parm	:	
- 		INT IDENTIFICATEUR	
+ 		INT IDENTIFICATEUR { $$ = createNode($2, TYPE_VAR, NULL); }
 ;
 liste_instructions :	
  		liste_instructions instruction
@@ -113,7 +125,7 @@ iteration	:
  	|	WHILE '(' condition ')' instruction
 ;
 selection	:	
- 		IF '(' condition ')' instruction %prec THEN
+ 		IF '(' condition ')' instruction %prec THEN 
  	|	IF '(' condition ')' instruction ELSE instruction
  	|	SWITCH '(' expression ')' instruction
  	|	CASE CONSTANTE ':' instruction
@@ -128,7 +140,7 @@ affectation	:
  		variable '=' expression 
 ;
 bloc	:	
- 		'{' liste_declarations liste_instructions '}'
+ 		'{' liste_declarations liste_instructions '}' { pop(); }
 ;
 appel	:	
  		IDENTIFICATEUR '(' liste_expressions ')' ';'
@@ -193,13 +205,21 @@ int main(){
     return 0;
 }
 
-Node* createNode(char* name){
+Node* createNode(char* name, type_s type, symbol_struct* s_struct){
 	Node* node = (Node*) malloc(sizeof(Node));
 	node->name = name;
-	node->type = TYPE_VAR;
-	node->s_struct = NULL;
+	node->type = type;
+	node->s_struct = s_struct;	
 	node->next = NULL;
 	return node;
+}
+
+symbol_struct* createFunStruct(type_t type, Node* node){
+	symbol_struct* s_struct = (symbol_struct*) malloc(sizeof(symbol_struct));
+	s_struct->function = (symbol_function*) malloc(sizeof(symbol_function));
+	s_struct->function->nb_param = len(node);
+	s_struct->function->type = type;
+	return s_struct;
 }
 
 void freeStack(){
@@ -244,10 +264,8 @@ Node* addNode(Node* node1, Node* node2){
 	}
 	else{
 		Node* temp_node = node1;
-		Node* curr_node = node1;
-		while(curr_node != NULL){
-			temp_node = curr_node;
-			curr_node = temp_node->next;
+		while(temp_node->next != NULL){
+			temp_node = temp_node->next;
 		}
 		temp_node->next = node2;
 		return node1;
@@ -268,15 +286,41 @@ void push(TableStack* stack){
 	top = stack;
 }
 
-//-------------FONCTIONS POUR DEBUG------------
+void pop(){
+	TableStack* temp_stack = top;
+	if(top){
+		top = top->next;
+	}
+	free(temp_stack);
+}
+
+int len(Node* node){
+	int length = 0;
+	Node* temp_node = node;
+	while(temp_node != NULL){
+		length++;
+		temp_node = temp_node->next;
+	}
+	return length;
+}
+
+//-------------FONCTIONS POUR DEBUG--------------
+
+void printStruct(symbol_struct* s_struct, type_s type){
+	if(type == TYPE_FUN){
+		printf("{nb_param: %d, type: %d} ", s_struct->function->nb_param, s_struct->function->type);
+	}
+}
 
 void printNode(Node* node){
 	if (node){
-		char* s = "NULL";
+		printf("node : {name: %s, type: %d, s_struct: ", node->name, node->type);
 		if (node->s_struct){
-			//changer s
+			printStruct(node->s_struct, node->type);
+		}else{
+			printf("NULL, ");
 		}
-		printf("node : {name: %s, type: %d, s_struct: %s next: ", node->name, node->type, s);
+		printf("next: ");
 		if (node->next == NULL){
 			printf("NULL}\n");
 		}else{
