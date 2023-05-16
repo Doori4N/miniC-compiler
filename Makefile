@@ -3,8 +3,8 @@ TESTS := $(wildcard $(TESTS_DIR)/*.c)
 
 all: miniC
 
-miniC: lex.yy.c y.tab.c
-	gcc lex.yy.c y.tab.c -o miniC
+miniC: lex.yy.c y.tab.c 
+	gcc lex.yy.c y.tab.c memory.c table_symbole.c -o miniC
 
 lex.yy.c: ANSI-C.l
 	lex ANSI-C.l
@@ -19,7 +19,8 @@ test: miniC
 	done
 
 start: miniC
-	./miniC < Tests/variables.c
+	./miniC < Tests/switch.c
+	dot -Tpdf ex.dot -o ex.pdf
 
 clean:
 	rm -f lex.yy.c y.tab.c y.tab.h miniC

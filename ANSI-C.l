@@ -8,6 +8,7 @@ C                       \/\*(.|[\n\t\r])*\*\/
     #include <stdio.h>
     #include <stdlib.h>
     #include "table_symbole.h"
+    #include "memory.h"
     #include "y.tab.h"
 %}
 
@@ -28,7 +29,7 @@ C                       \/\*(.|[\n\t\r])*\*\/
 
 {L}({L}|{D})*           { yylval.str = strdup(yytext); return IDENTIFICATEUR; }
       
-{D}+                    { yylval.val = atoi(yytext); return CONSTANTE; }
+{D}+                    { yylval.str = strdup(yytext); return CONSTANTE; }
 
 "<="                    { return LEQ; }
 ">="                    { return GEQ; }
@@ -52,12 +53,3 @@ C                       \/\*(.|[\n\t\r])*\*\/
 [ \t\v\n\f]             ;
 .                       { return yytext[0]; }
 %%
-/* int main(){
-    int token_courant=yylex();
-    printf("Codes des tokens retournés par yylex: ");
-    do {
-        printf("%d ", token_courant);
-        token_courant = yylex();
-    }while (token_courant != TOKEN_EOF);
-    return 0;
-} */

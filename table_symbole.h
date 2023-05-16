@@ -15,41 +15,35 @@ typedef union{
     symbol_function* function;
 } symbol_struct;
 
-typedef struct node{
+typedef struct symbol{
     char* name;
     type_s type;
     symbol_struct* s_struct;
-    struct node* next;
-} Node;
+    struct symbol* next;
+} Symbol;
 
 typedef struct stack{
-    Node* node;
+    Symbol* symbol;
     struct stack* next;
 } TableStack;
 
-Node* createNode(char* name, type_s type, symbol_struct* s_struct);
-Node* addNode(Node* node1, Node* node2);
+Symbol* createSymbol(char* name, type_s type, symbol_struct* s_struct);
+Symbol* addSymbol(Symbol* symbol1, Symbol* symbol2);
 
 TableStack* initTable();
 void push(TableStack* stack);
 void pop();
 
-symbol_struct* createFunStruct(type_t type, Node* node);
+symbol_struct* createFunStruct(type_t type, Symbol* symbol);
 
-int len(Node* node);
+int len(Symbol* symbol);
+char* type_tToString(type_t type);
 
-void freeNodes(Node* node);
+void freeSymbols(Symbol* symbol);
 void freeStack();
 void freeOneStack(TableStack* stack);
-// TableStack createTableStack();
-// Symbole* searchSymbole(TableStack* table, char* nom);
-// Symbole* createSymbole(type_t type, value val);
-
-// void addSymbole(char *nom, Symbole* suivant);
-// void addTableStack(char* nom);
-// void freeTableStack(TableStack* table);
 
 //FONCTIONS POUR DEBUG
-void printNode(Node* node);
+void printSymbol(Symbol* symbol);
 void printStack(TableStack* stack);
 void printStruct(symbol_struct* s_struct, type_s type);
