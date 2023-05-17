@@ -19,7 +19,7 @@ test: miniC
 	done
 
 start: miniC
-	./miniC < Tests/switch.c
+	./miniC < Tests/functions.c
 	dot -Tpdf ex.dot -o ex.pdf
 
 clean:

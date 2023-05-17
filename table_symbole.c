@@ -4,6 +4,7 @@
 #include "table_symbole.h"
 
 TableStack* top = NULL;//représente le sommet de la pile
+extern int yyerror(char *s);
 
 Symbol* createSymbol(char* name, type_s type, symbol_struct* s_struct){
 	Symbol* symbol = (Symbol*) malloc(sizeof(Symbol));
@@ -119,4 +120,96 @@ char* type_tToString(type_t type){
 		return "void";
 	}
 	return "int";
+}
+
+int isCallable(TableStack* stack, char* name){
+    int flag;
+    Symbol* symbol = stack->symbol;
+    while(symbol != NULL){
+        if(strcmp(symbol->name, name) == 0 && symbol->type == TYPE_FUN){
+            //if(symbol->s_struct->function->nb_param != ?){
+            //    flag = 2;
+            //} // A finir
+            flag = FUNCTION_OK;
+            
+        }
+        symbol = symbol->next;
+        
+    }
+    if(stack->next != NULL)
+        return isCallable(stack->next, name);
+    return flag;
+}
+
+int isAlreadyDefined(TableStack* stack, char* name){
+    Symbol* symbol = stack->symbol;
+    while(symbol != NULL){
+        if(strcmp(symbol->name, name) == 0){
+            return 1;
+        }
+        symbol = symbol->next;
+        if(symbol == NULL && stack->next != NULL){
+            return isAlreadyDefined(stack->next, name);
+        }
+    }
+    return 0;
+}
+
+int isFunctionDefined(TableStack* stack, char* name){
+    Symbol* symbol = stack->symbol;
+    while(symbol != NULL){
+        if(strcmp(symbol->name, name) == 0 && symbol->type == TYPE_FUN){
+            return 1;
+        }
+        symbol = symbol->next;
+    }
+    return 0;
+}
+
+/*
+int checkArray(){
+    int flag;
+
+    if($3->type != TYPE_INT){
+                return ARRAY_BAD_TYPE;
+    }
+
+    if($1->type != TYPE_ARR){
+        return ARRAY_UNDEFINED;
+    }
+
+    if($1->s_struct->array->dimensions[0] < $3->val){
+        return ARRAY_OUT_OF_RANGE;
+    }
+    return ARRAY_OK;
+
+}*/
+
+void checkFlag(int flag){
+    switch(flag){
+        case FUNCTION_UNDEFINED:
+            yyerror("Error! Function not defined");
+            break;
+        case FUNCTION_BAD_NB_ARGS:
+            yyerror("Error! Bad number of arguments");
+            break;
+        case VAR_UNDEFINED:
+            yyerror("Error! Variable not defined");
+            break;
+        case ARRAY_BAD_INDEX:
+            yyerror("Error! Bad type for array index");
+            break;
+        case ARRAY_UNDEFINED:
+            yyerror("Error! Array not defined");
+            break;
+        case ARRAY_OUT_OF_RANGE:
+            yyerror("Error! Index out of range");
+            break;
+        case ARRAY_BAD_TYPE:
+            yyerror("Error! Bad type for array");
+            break;
+        default:
+            //Tout est bon
+            break;
+    }
 }

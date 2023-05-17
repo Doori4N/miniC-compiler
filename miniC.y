@@ -65,9 +65,15 @@ liste_fonctions	:
 ;
 declaration	:	
  		type liste_declarateurs ';' {
-			if($1 == TYPE_VOID) yyerror("Error! bad type for variable : VOID");
-			else $$ = $2;
-		}
+            if($1 == TYPE_VOID){
+                yyerror("Error! Bad type for variable : VOID");
+            }else{
+                if(isAlreadyDefined(top, $2->name)){
+                    yyerror("Error! Variable already defined");
+                    }
+                $$ = $2;
+            }
+        }
 ;
 liste_declarateurs	:	
  		liste_declarateurs ',' declarateur {
@@ -84,6 +90,8 @@ fonction		:
 			pop();//supprime la table de symbole en haut de la pile
 			pop();//supprime le sommet de la pile (liste_parms)
 
+			if(isFunctionDefined(top, $2)) yyerror("Error! Function already defined");
+
 			top->symbol = addSymbol(createSymbol($2, TYPE_FUN, createFunStruct($1, $4->symbol)), top->symbol); //ajoute la fonction à la liste du bloc parent
 			char *label;
 			label = (char*) malloc(strlen($2) + strlen(type_tToString($1)) + 3);	 
@@ -98,6 +106,7 @@ fonction		:
 		}
  	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' { 
 			pop();//supprime le sommet de la pile (liste_parms)
+			if(isFunctionDefined(top, $3)) yyerror("Error! Extern function already defined");
 			top->symbol = addSymbol(createSymbol($3, TYPE_FUN, createFunStruct($2, $5->symbol)), top->symbol); //ajoute le symbole au sommet de la stack
 			$$ = NULL;
 		}
@@ -206,13 +215,28 @@ bloc	:
 ;
 appel	:	
  		IDENTIFICATEUR '(' liste_expressions ')' ';' {
+			int flag = isCallable(top, $1);
+            checkFlag(flag);
+			//ajouter verif liste
+
 			$$ = createNode(FUN_CALL_NODE, $1);
 			$$->list = $3;
 		}
 ;
 variable	:	
- 		IDENTIFICATEUR { $$ = createNode(NODE, $1); }
+ 		IDENTIFICATEUR { 
+			if(!isAlreadyDefined(top, $1)){
+                yyerror("Error! Variable not defined");
+            }
+			$$ = createNode(NODE, $1); 
+		}
  	|	variable '[' expression ']' { 
+			if(!isAlreadyDefined(top, $1->name)){
+                yyerror("Error! Variable not defined");
+            }
+            int flag = ARRAY_UNDEFINED;//checkArray($1, $3);
+            checkFlag(flag);
+
 			//si la node TAB n'est pas encore initialisé
 			if($1->list == NULL){
 				$$ = createNode(NODE, "TAB");
@@ -289,8 +313,9 @@ binary_comp	:
 %%
 
 int yyerror(char *s){
-    fprintf(stderr, "%s, ligne : %d \n", s, yylineno);
-    exit(1); //le programme s'arrete lors d'une erreur de syntaxe
+    fprintf(stderr, "\033[31;1m%s, line : %d\033[0m \n", s, yylineno);
+    freeStack(top);
+    exit(1); //le programme s'arrete lors d'une erreur
 }
 
 int main(){
