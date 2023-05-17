@@ -39,7 +39,7 @@ Symbol* addSymbol(Symbol* symbol1, Symbol* symbol2);
 
 TableStack* initTable();
 void push(TableStack* stack);
-void pop();
+TableStack* pop();
 
 symbol_struct* createFunStruct(type_t type, Symbol* symbol);
 

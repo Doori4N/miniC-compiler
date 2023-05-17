@@ -97,12 +97,12 @@ void push(TableStack* stack){
 	top = stack;
 }
 
-void pop(){
+TableStack* pop(){
 	TableStack* temp_stack = top;
 	if(top){
 		top = top->next;
 	}
-	freeOneStack(temp_stack);
+	return temp_stack;
 }
 
 int len(Symbol* symbol){

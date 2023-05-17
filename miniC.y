@@ -70,7 +70,7 @@ declaration	:
             }else{
                 if(isAlreadyDefined(top, $2->name)){
                     yyerror("Error! Variable already defined");
-                    }
+                }
                 $$ = $2;
             }
         }
@@ -88,11 +88,11 @@ declarateur		:
 fonction		:	
  		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' { 
 			pop();//supprime la table de symbole en haut de la pile
-			pop();//supprime le sommet de la pile (liste_parms)
+			TableStack *liste_parms = pop();//supprime le sommet de la pile (liste_parms)
 
 			if(isFunctionDefined(top, $2)) yyerror("Error! Function already defined");
 
-			top->symbol = addSymbol(createSymbol($2, TYPE_FUN, createFunStruct($1, $4->symbol)), top->symbol); //ajoute la fonction à la liste du bloc parent
+			top->symbol = addSymbol(createSymbol($2, TYPE_FUN, createFunStruct($1, liste_parms->symbol)), top->symbol); //ajoute la fonction à la liste du bloc parent
 			char *label;
 			label = (char*) malloc(strlen($2) + strlen(type_tToString($1)) + 3);	 
 			sprintf(label, "%s, %s", $2, type_tToString($1));
@@ -104,10 +104,10 @@ fonction		:
 				$$->list = initChildrenList(bloc);//le bloc est le fils de la fonction
 			}else $$->list = $8; //si il y a qu'une seule ou 0 instruction alors pas de bloc
 		}
- 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' { 
-			pop();//supprime le sommet de la pile (liste_parms)
+ 	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' {
+			TableStack *liste_parms = pop();//supprime le sommet de la pile (liste_parms)
 			if(isFunctionDefined(top, $3)) yyerror("Error! Extern function already defined");
-			top->symbol = addSymbol(createSymbol($3, TYPE_FUN, createFunStruct($2, $5->symbol)), top->symbol); //ajoute le symbole au sommet de la stack
+			top->symbol = addSymbol(createSymbol($3, TYPE_FUN, createFunStruct($2, liste_parms->symbol)), top->symbol); //ajoute le symbole au sommet de la stack
 			$$ = NULL;
 		}
 ;
