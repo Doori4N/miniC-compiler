@@ -94,7 +94,7 @@ declarateur		:
  	|	declarateur '[' CONSTANTE ']' 
 ;
 fonction		:	
- 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations liste_instructions '}' { 
+ 		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations { top->symbol = addSymbol(createSymbol($2, TYPE_FUN, createFunStruct($1, $4->symbol)), top->symbol); } liste_instructions '}' { 
 			pop();//supprime la table de symbole en haut de la pile
 			TableStack *liste_parms = pop();//supprime le sommet de la pile (liste_parms)
 
@@ -106,11 +106,11 @@ fonction		:
 			sprintf(label, "%s, %s", $2, type_tToString($1));
 
 			$$ = createNode(FUN_NODE, label);
-			if (len_children_list($8) > 1) {
+			if (len_children_list($9) > 1) {
 				node *bloc = createNode(NODE, "BLOC");
-				bloc->list = $8;//la liste d'instruction est la liste des fils du bloc
+				bloc->list = $9;//la liste d'instruction est la liste des fils du bloc
 				$$->list = initChildrenList(bloc);//le bloc est le fils de la fonction
-			}else $$->list = $8; //si il y a qu'une seule ou 0 instruction alors pas de bloc
+			}else $$->list = $9; //si il y a qu'une seule ou 0 instruction alors pas de bloc
 		}
  	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' {
 			TableStack *liste_parms = pop();//supprime le sommet de la pile (liste_parms)
@@ -223,10 +223,8 @@ bloc	:
 ;
 appel	:	
  		IDENTIFICATEUR '(' liste_expressions ')' ';' {
-			printStack(top);
 			int flag = isCallable(top, $1, $3);
             checkFlag(flag);
-			//ajouter verif liste
 
 			$$ = createNode(FUN_CALL_NODE, $1);
 			$$->list = $3;
@@ -271,7 +269,14 @@ expression	:
             checkFlag(flag);
 		}*/
 		$$ = $1; }
- 	|	IDENTIFICATEUR '(' liste_expressions ')' { $$ = createNode(TEST_NODE, "EXPR"); }
+ 	|	IDENTIFICATEUR '(' liste_expressions ')' {
+			printStack(top);
+			int flag = isCallable(top, $1, $3);
+            checkFlag(flag);
+
+			$$ = createNode(FUN_CALL_NODE, $1);
+			$$->list = $3;
+		}
 ;
 liste_expressions	:	
  		l_expressions { $$ = $1; }
