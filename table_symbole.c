@@ -123,7 +123,7 @@ char* type_tToString(type_t type){
 }
 
 int isCallable(TableStack* stack, char* name){
-    int flag;
+    int flag = FUNCTION_UNDEFINED;
     Symbol* symbol = stack->symbol;
     while(symbol != NULL){
         if(strcmp(symbol->name, name) == 0 && symbol->type == TYPE_FUN){
@@ -131,7 +131,6 @@ int isCallable(TableStack* stack, char* name){
             //    flag = 2;
             //} // A finir
             flag = FUNCTION_OK;
-            
         }
         symbol = symbol->next;
         

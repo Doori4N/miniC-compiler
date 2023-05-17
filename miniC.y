@@ -47,7 +47,7 @@
 
 %%
 programme	:	
- 		liste_declarations liste_fonctions { createFile($2); freeStack(); }
+ 		liste_declarations liste_fonctions { createFile($2); }
 ;
 liste_declarations	:	
 		liste_declarations declaration {
@@ -225,15 +225,15 @@ appel	:
 ;
 variable	:	
  		IDENTIFICATEUR { 
+			char *label;
+			label = (char*) malloc(28 + strlen($1) + 1);	 
+			sprintf(label, "Error! Variable %s is not defined", $1);
 			if(!isAlreadyDefined(top, $1)){
-                yyerror("Error! Variable not defined");
+                yyerror(label);
             }
 			$$ = createNode(NODE, $1); 
 		}
  	|	variable '[' expression ']' { 
-			if(!isAlreadyDefined(top, $1->name)){
-                yyerror("Error! Variable not defined");
-            }
             int flag = ARRAY_UNDEFINED;//checkArray($1, $3);
             checkFlag(flag);
 
