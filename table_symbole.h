@@ -7,11 +7,11 @@ typedef enum {TYPE_VOID, TYPE_INT} type_t;
 typedef enum {TYPE_FUN, TYPE_ARR, TYPE_VAR} type_s;
 typedef enum {FUNCTION_UNDEFINED,FUNCTION_BAD_NB_ARGS,FUNCTION_OK,
               VAR_UNDEFINED,VAR_OK,
-              ARRAY_BAD_INDEX,ARRAY_UNDEFINED,ARRAY_OUT_OF_RANGE,ARRAY_BAD_TYPE,ARRAY_OK,
+              ARRAY_BAD_INDEX,ARRAY_UNDEFINED,ARRAY_WRONG_DIMENSION,ARRAY_BAD_TYPE,ARRAY_OK,
 }flag;
 
 typedef struct{
-    int dimensions[1];
+    int dimension;
 } symbol_array;
 
 typedef struct{
@@ -44,6 +44,7 @@ void push(TableStack* stack);
 TableStack* pop();
 
 symbol_struct* createFunStruct(type_t type, Symbol* symbol);
+symbol_struct* createArrStruct();
 
 int len(Symbol* symbol);
 char* type_tToString(type_t type);
@@ -53,9 +54,9 @@ void freeStack();
 void freeOneStack(TableStack* stack);
 
 int isCallable(TableStack* stack, char* name,children_list* list);
-int isAlreadyDefined(TableStack* stack, char* name);
+Symbol* isAlreadyDefined(TableStack* stack, char* name);
 int isFunctionDefined(TableStack* stack, char* name);
-int lookup(TableStack* stack, char* name);
+Symbol* lookup(TableStack *stack, char *name);
 int checkArray(TableStack* stack, node *var, node *expr);
 void checkFlag(int flag);
 

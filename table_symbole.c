@@ -15,6 +15,13 @@ Symbol* createSymbol(char* name, type_s type, symbol_struct* s_struct){
 	return symbol;
 }
 
+symbol_struct* createArrStruct(){
+	symbol_struct* s_struct = (symbol_struct*) malloc(sizeof(symbol_struct));
+	s_struct->array = (symbol_array*) malloc(sizeof(symbol_array));
+	s_struct->array->dimension = 0;
+	return s_struct;
+}
+
 symbol_struct* createFunStruct(type_t type, Symbol* symbol){
 	symbol_struct* s_struct = (symbol_struct*) malloc(sizeof(symbol_struct));
 	s_struct->function = (symbol_function*) malloc(sizeof(symbol_function));
@@ -51,7 +58,6 @@ void freeSymbols(Symbol* symbol1) {
             switch(temp->type) {
                 case TYPE_ARR:
 					printf("Free du tableau\n");
-                    free(temp->s_struct->array->dimensions); 
                     free(temp->s_struct->array); 
                     break;
                 case TYPE_FUN:
@@ -69,12 +75,12 @@ void freeSymbols(Symbol* symbol1) {
     }
 }
 
-Symbol* addSymbol(Symbol* symbol1, Symbol* symbol2){
+Symbol* addSymbol(Symbol *symbol1, Symbol *symbol2){
 	if (symbol1 == NULL){
 		return symbol2;
 	}
 	else{
-		Symbol* temp_symbol = symbol1;
+		Symbol *temp_symbol = symbol1;
 		while(temp_symbol->next != NULL){
 			temp_symbol = temp_symbol->next;
 		}
@@ -143,23 +149,24 @@ int isCallable(TableStack* stack, char* name,children_list* list){
     return flag;
 }
 
-int isAlreadyDefined(TableStack* stack, char* name){
-    Symbol* symbol = stack->symbol;
+Symbol* isAlreadyDefined(TableStack *stack, char *name){
+    Symbol *symbol = stack->symbol;
     while(symbol != NULL){
         if(strcmp(symbol->name, name) == 0){
-            return 1;
+            return symbol;
         }
         symbol = symbol->next;
     }
-    return 0;
+    return NULL;
 }
-int lookup(TableStack *stack, char *name){
-    if(isAlreadyDefined(stack,name)){
-        return 1;
-    }
+
+Symbol* lookup(TableStack *stack, char *name){
+	Symbol *symbol = isAlreadyDefined(stack,name);
+    if(symbol != NULL) return symbol;
     if(stack->next != NULL) return lookup(stack->next, name);
-    else return 0;
+    return NULL;
 }
+
 int isFunctionDefined(TableStack* stack, char* name){
     Symbol* symbol = stack->symbol;
     while(symbol != NULL){
@@ -183,7 +190,6 @@ int checkArray(TableStack* stack, node *var, node *expr){
         if (strcmp(symbol->name,var->name)==0 && symbol->type == TYPE_ARR){
             printf("big test\n");
             return ARRAY_OK;
-
         } 
     }
 
@@ -207,8 +213,8 @@ void checkFlag(int flag){
         case ARRAY_UNDEFINED:
             yyerror("Error! Array not defined");
             break;
-        case ARRAY_OUT_OF_RANGE:
-            yyerror("Error! Index out of range");
+        case ARRAY_WRONG_DIMENSION:
+            yyerror("Error! Wrong dimension for array");
             break;
         case ARRAY_BAD_TYPE:
             yyerror("Error! Bad type for array");

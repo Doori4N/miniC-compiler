@@ -50,48 +50,40 @@ programme	:
  		liste_declarations liste_fonctions { createFile($2); }
 ;
 liste_declarations	:	
-		liste_declarations declaration {
-			$1->symbol = addSymbol($1->symbol, $2);//Ajoute la/les symbol(s) à la table de symboles 
-			$$ = $1;
-		}
- 	|	{
-			$$ = initTable();//Initialise une table de symboles
-			push($$);//Ajoute la table à la pile
-		}
+		liste_declarations declaration
+ 	|	{ push(initTable()); }
 ;
 liste_fonctions	:	
  		liste_fonctions fonction { $$ = addNodeToList($1, createNodeList($2)); }
  	|   fonction { $$ = createNodeList($1); }
 ;
 declaration	:	
- 		type liste_declarateurs ';' {
-            if($1 == TYPE_VOID){
-                yyerror("Error! Bad type for variable : VOID");
-            }else{
-                if(isAlreadyDefined(top, $2->name)){
-                    yyerror("Error! Variable already defined");
-                }
-                $$ = $2;
-            }
-        }
+ 		type liste_declarateurs ';' { if($1 == TYPE_VOID) yyerror("Error! Bad type for variable : VOID"); }
 ;
 liste_declarateurs	:	
- 		liste_declarateurs ',' declarateur {
-			$$ = addSymbol($1, $3); //ajoute une symbol à la liste
-		}
- 	|	declarateur { $$ = $1; }
+ 		liste_declarateurs ',' declarateur
+ 	|	declarateur
 ;
 declarateur		:	
  		IDENTIFICATEUR { 
-			if(isAlreadyDefined(top,$1)){
+			if(isAlreadyDefined(top,$1) != NULL){
 				char *label;
 				label = (char*) malloc(28 + strlen($1) + 1);	 
-				sprintf(label, "Error! Variable %s is already defined.", $1);
+				sprintf(label, "Error! Variable %s is already defined", $1);
 				yyerror(label);
 				free(label);
 			}
-			$$ = createSymbol($1, TYPE_VAR, NULL); }
- 	|	declarateur '[' CONSTANTE ']' 
+			$$ = createSymbol($1, TYPE_VAR, NULL);
+			top->symbol = addSymbol(top->symbol, $$);
+		}
+ 	|	declarateur '[' CONSTANTE ']' {
+			$$ = $1;
+			if($$->s_struct == NULL){
+				$$->type = TYPE_ARR;
+				$$->s_struct = createArrStruct();
+			}
+			$$->s_struct->array->dimension++;
+		}
 ;
 fonction		:	
  		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations { top->symbol = addSymbol(createSymbol($2, TYPE_FUN, createFunStruct($1, $4->symbol)), top->symbol); } liste_instructions '}' { 
@@ -175,7 +167,6 @@ iteration	:
 ;
 selection	:	
  		IF '(' condition ')' instruction %prec THEN {
-			//FAUT IL AFFICHER LE IF SI IL N Y A PAS D INSTRUCTIONS ?????
 			$$ = createNode(IF_NODE, "IF");
 			addChildToNode($$, $3);
 			addChildToNode($$, $5);
@@ -205,6 +196,12 @@ saut	:
 ;
 affectation	:	
  		variable '=' expression {
+			if($1->type == ARR_NODE){
+				Symbol *_array = lookup(top, $1->list->child->name);
+				if(len_children_list($1->list)-1 != _array->s_struct->array->dimension){
+					checkFlag(ARRAY_WRONG_DIMENSION);
+				}
+			}
 			$$ = createNode(NODE, ":=");
 			addChildToNode($$, $1);
 			addChildToNode($$, $3);
@@ -235,18 +232,19 @@ variable	:
 			char *label;
 			label = (char*) malloc(28 + strlen($1) + 1);	 
 			sprintf(label, "Error! Variable %s is never defined", $1);
-			if(!lookup(top, $1)){
-                yyerror(label);
-            }
-			$$ = createNode(NODE, $1); 
+
+			Symbol *_symbol = lookup(top, $1);
+			if(_symbol == NULL) yyerror(label);
+			else if (_symbol->type == TYPE_ARR) {
+				$$ = createNode(ARR_NODE, "TAB");
+				addChildToNode($$, createNode(NODE, $1));
+			}
+			else if (_symbol->type == TYPE_FUN) yyerror("Error! bad syntax for function call");
+			else $$ = createNode(NODE, $1); 
 		}
  	|	variable '[' expression ']' { 
-
-			//si la node TAB n'est pas encore initialisé
-			if($1->list == NULL){
-				$$ = createNode(NODE, "TAB");
-				addChildToNode($$, $1);
-			}else $$ = $1;
+			if($1->type == NODE) yyerror("Error! this variable is not an array");
+			$$ = $1;
 			addChildToNode($$, $3);
 		}
 ;
@@ -263,14 +261,15 @@ expression	:
 		}
  	|	CONSTANTE { $$ = createNode(NODE, $1); }
  	|	variable { 
-		/*if($1->type == ARR_NODE){
-			int flag = checkArray(top,$1);
-			printf("flag : %d\n", flag);
-            checkFlag(flag);
-		}*/
-		$$ = $1; }
+			if($1->type == ARR_NODE){
+				Symbol *_array = lookup(top, $1->list->child->name);
+				if(len_children_list($1->list)-1 != _array->s_struct->array->dimension){
+					checkFlag(ARRAY_WRONG_DIMENSION);
+				}
+			}
+			$$ = $1; 
+		}
  	|	IDENTIFICATEUR '(' liste_expressions ')' {
-			printStack(top);
 			int flag = isCallable(top, $1, $3);
             checkFlag(flag);
 
@@ -346,6 +345,8 @@ int main(){
 void printStruct(symbol_struct* s_struct, type_s type){
 	if(type == TYPE_FUN){
 		printf("{nb_param: %d, type: %d} ", s_struct->function->nb_param, s_struct->function->type);
+	}else if(type == TYPE_ARR){
+		printf("{dimension: %d} ", s_struct->array->dimension);
 	}
 }
 
