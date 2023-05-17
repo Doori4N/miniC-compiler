@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "table_symbole.h"
-
+#include "memory.h" 
 TableStack* top = NULL;//représente le sommet de la pile
 extern int yyerror(char *s);
 
@@ -122,21 +122,24 @@ char* type_tToString(type_t type){
 	return "int";
 }
 
-int isCallable(TableStack* stack, char* name){
+int isCallable(TableStack* stack, char* name,children_list* list){
     int flag = FUNCTION_UNDEFINED;
     Symbol* symbol = stack->symbol;
     while(symbol != NULL){
         if(strcmp(symbol->name, name) == 0 && symbol->type == TYPE_FUN){
-            //if(symbol->s_struct->function->nb_param != ?){
-            //    flag = 2;
-            //} // A finir
-            flag = FUNCTION_OK;
+            if(symbol->s_struct->function->nb_param == len_children_list(list)){
+                return FUNCTION_OK;
+            }
+            else{
+                return FUNCTION_BAD_NB_ARGS;
+            }
+            return FUNCTION_OK;
         }
         symbol = symbol->next;
         
     }
     if(stack->next != NULL)
-        return isCallable(stack->next, name);
+        return isCallable(stack->next, name,list);
     return flag;
 }
 
@@ -147,13 +150,16 @@ int isAlreadyDefined(TableStack* stack, char* name){
             return 1;
         }
         symbol = symbol->next;
-        if(symbol == NULL && stack->next != NULL){
-            return isAlreadyDefined(stack->next, name);
-        }
     }
     return 0;
 }
-
+int lookup(TableStack *stack, char *name){
+    if(isAlreadyDefined(stack,name)){
+        return 1;
+    }
+    if(stack->next != NULL) return lookup(stack->next, name);
+    else return 0;
+}
 int isFunctionDefined(TableStack* stack, char* name){
     Symbol* symbol = stack->symbol;
     while(symbol != NULL){
@@ -162,27 +168,27 @@ int isFunctionDefined(TableStack* stack, char* name){
         }
         symbol = symbol->next;
     }
+    if(stack->next != NULL)
+        return isFunctionDefined(stack->next, name);
+
     return 0;
 }
 
-/*
-int checkArray(){
-    int flag;
 
-    if($3->type != TYPE_INT){
-                return ARRAY_BAD_TYPE;
+int checkArray(TableStack* stack, node *var, node *expr){
+    int flag = ARRAY_UNDEFINED;
+    Symbol* symbol = stack->symbol;
+
+    while(symbol !=NULL){
+        if (strcmp(symbol->name,var->name)==0 && symbol->type == TYPE_ARR){
+            printf("big test\n");
+            return ARRAY_OK;
+
+        } 
     }
 
-    if($1->type != TYPE_ARR){
-        return ARRAY_UNDEFINED;
-    }
-
-    if($1->s_struct->array->dimensions[0] < $3->val){
-        return ARRAY_OUT_OF_RANGE;
-    }
-    return ARRAY_OK;
-
-}*/
+    return flag;
+}
 
 void checkFlag(int flag){
     switch(flag){

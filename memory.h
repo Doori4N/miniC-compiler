@@ -1,6 +1,8 @@
+#ifndef MEMORY_H
+#define MEMORY_H
 #include <stdio.h>
 
-typedef enum {NODE, FUN_NODE, RET_NODE, BREAK_NODE, FUN_CALL_NODE, IF_NODE, TEST_NODE} type_node;
+typedef enum {NODE,ARR_NODE, FUN_NODE, RET_NODE, BREAK_NODE, FUN_CALL_NODE, IF_NODE, TEST_NODE} type_node;
 
 typedef struct _node node;
 
@@ -58,3 +60,5 @@ node_list* createNodeList(node *_node);
 void writeNode(node *_node, FILE *fd);
 void writeNodeInfo(char *label, char *shape, char *color, int id, FILE *fd);
 void writeLink(int id1, int id2, FILE *fd);
+
+#endif

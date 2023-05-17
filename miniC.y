@@ -82,7 +82,15 @@ liste_declarateurs	:
  	|	declarateur { $$ = $1; }
 ;
 declarateur		:	
- 		IDENTIFICATEUR { $$ = createSymbol($1, TYPE_VAR, NULL); }
+ 		IDENTIFICATEUR { 
+			if(isAlreadyDefined(top,$1)){
+				char *label;
+				label = (char*) malloc(28 + strlen($1) + 1);	 
+				sprintf(label, "Error! Variable %s is already defined.", $1);
+				yyerror(label);
+				free(label);
+			}
+			$$ = createSymbol($1, TYPE_VAR, NULL); }
  	|	declarateur '[' CONSTANTE ']' 
 ;
 fonction		:	
@@ -215,7 +223,8 @@ bloc	:
 ;
 appel	:	
  		IDENTIFICATEUR '(' liste_expressions ')' ';' {
-			int flag = isCallable(top, $1);
+			printStack(top);
+			int flag = isCallable(top, $1, $3);
             checkFlag(flag);
 			//ajouter verif liste
 
@@ -227,15 +236,13 @@ variable	:
  		IDENTIFICATEUR { 
 			char *label;
 			label = (char*) malloc(28 + strlen($1) + 1);	 
-			sprintf(label, "Error! Variable %s is not defined", $1);
-			if(!isAlreadyDefined(top, $1)){
+			sprintf(label, "Error! Variable %s is never defined", $1);
+			if(!lookup(top, $1)){
                 yyerror(label);
             }
 			$$ = createNode(NODE, $1); 
 		}
  	|	variable '[' expression ']' { 
-            int flag = ARRAY_UNDEFINED;//checkArray($1, $3);
-            checkFlag(flag);
 
 			//si la node TAB n'est pas encore initialisé
 			if($1->list == NULL){
@@ -257,7 +264,13 @@ expression	:
 			addChildToNode($$, $2); 
 		}
  	|	CONSTANTE { $$ = createNode(NODE, $1); }
- 	|	variable { $$ = $1; }
+ 	|	variable { 
+		/*if($1->type == ARR_NODE){
+			int flag = checkArray(top,$1);
+			printf("flag : %d\n", flag);
+            checkFlag(flag);
+		}*/
+		$$ = $1; }
  	|	IDENTIFICATEUR '(' liste_expressions ')' { $$ = createNode(TEST_NODE, "EXPR"); }
 ;
 liste_expressions	:	
