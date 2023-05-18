@@ -99,7 +99,7 @@ fonction		:
 
 			$$ = createNode(FUN_NODE, label);
 			if (len_children_list($9) > 1) {
-				node *bloc = createNode(NODE, "BLOC");
+				node *bloc = createNode(BLOC_NODE, "BLOC");
 				bloc->list = $9;//la liste d'instruction est la liste des fils du bloc
 				$$->list = initChildrenList(bloc);//le bloc est le fils de la fonction
 			}else $$->list = $9; //si il y a qu'une seule ou 0 instruction alors pas de bloc
@@ -180,11 +180,20 @@ selection	:
  	|	SWITCH '(' expression ')' instruction {
 			$$ = createNode(NODE, "SWITCH");
 			addChildToNode($$, $3);
-			if(strcmp($5->name, "BLOC") == 0) addChildToList($$->list, $5->list);
+			if($5->type == BLOC_NODE){
+				checkSwitchSyntax($5->list);
+				addChildToList($$->list, $5->list);
+			}
 			else addChildToNode($$, $5);
 		}
- 	|	CASE CONSTANTE ':' instruction { $$ = $4; }
- 	|	DEFAULT ':' instruction { $$ = $3; }
+ 	|	CASE CONSTANTE ':' instruction { 
+			$$ = createNode(CASE_NODE, "CASE");
+			addChildToNode($$, $4);
+		}
+ 	|	DEFAULT ':' instruction { 
+			$$ = createNode(DEFAULT_NODE, "DEFAULT");
+			addChildToNode($$, $3);
+	 	}
 ;
 saut	:	
  		BREAK ';' { $$ = createNode(BREAK_NODE, "BREAK"); }
@@ -213,13 +222,14 @@ bloc	:
 			if($3 == NULL) $$ = NULL;
 			else if(len_children_list($3) == 1) $$ = $3->child;//ajouter un free de la liste !
 			else{
-				$$ = createNode(NODE, "BLOC");
+				$$ = createNode(BLOC_NODE, "BLOC");
 				$$->list = $3;
 			}
 		}
 ;
 appel	:	
  		IDENTIFICATEUR '(' liste_expressions ')' ';' {
+			//verifier que id est une fonction
 			int flag = isCallable(top, $1, $3);
             checkFlag(flag);
 

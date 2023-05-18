@@ -3,8 +3,48 @@
 #include <string.h>
 #include "memory.h"
 
+extern int yyerror(char *s);
+
 int id = 0;
 int* ptr_id = &id;
+
+void checkSwitchSyntax(children_list *list){
+	children_list *curr_last_case = NULL;
+	int isDefaultDefine = 0;
+	while(list->next_child != NULL){
+		if(list->child->type == DEFAULT_NODE){
+			if(isDefaultDefine == 1) yyerror("error: multiple default labels in one switch");
+			else {
+				isDefaultDefine = 1;
+				curr_last_case = list;
+				list = list->next_child;
+			}
+		}
+		else if(list->child->type == CASE_NODE){
+			curr_last_case = list;
+			list = list->next_child;
+		} 
+		else{
+			curr_last_case->next_child = list->next_child;
+			list->next_child = NULL;
+			addChildToList(curr_last_case->child->list, list);
+			list = curr_last_case->next_child;
+		}
+	}
+	if(list->child->type == DEFAULT_NODE){
+		if(isDefaultDefine == 1) yyerror("error: multiple default labels in one switch");
+		else {
+			isDefaultDefine = 1;
+			curr_last_case = list;
+			list = list->next_child;
+		}
+	}else if(list->child->type != CASE_NODE){
+		curr_last_case->next_child = list->next_child;
+		list->next_child = NULL;
+		addChildToList(curr_last_case->child->list, list);
+		list = curr_last_case->next_child;
+	}
+}
 
 node_list* addNodeToList(node_list* list1, node_list* list2){
 	if(list1 == NULL) return list2;

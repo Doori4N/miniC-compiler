@@ -2,7 +2,7 @@
 #define MEMORY_H
 #include <stdio.h>
 
-typedef enum {NODE,ARR_NODE, FUN_NODE, RET_NODE, BREAK_NODE, FUN_CALL_NODE, IF_NODE, TEST_NODE} type_node;
+typedef enum {NODE,ARR_NODE, FUN_NODE, RET_NODE, CASE_NODE, DEFAULT_NODE, BLOC_NODE, BREAK_NODE, FUN_CALL_NODE, IF_NODE, TEST_NODE} type_node;
 
 typedef struct _node node;
 
@@ -56,6 +56,8 @@ children_list* initChildrenList(node *child);
 
 node_list* addNodeToList(node_list *list1, node_list *list2);
 node_list* createNodeList(node *_node);
+
+void checkSwitchSyntax(children_list *list);
 
 void writeNode(node *_node, FILE *fd);
 void writeNodeInfo(char *label, char *shape, char *color, int id, FILE *fd);
