@@ -32,7 +32,6 @@
 %left LAND LOR
 %nonassoc THEN
 %nonassoc ELSE
-%left OP
 %left REL
 
 %start programme
@@ -43,7 +42,7 @@
 %type <type> type
 %type <stack> liste_declarations liste_parms
 %type <symbol> declarateur liste_declarateurs declaration parm l_parms 
-%type <str> binary_rel binary_comp binary_op 
+%type <str> binary_rel binary_comp 
 
 %%
 programme	:	
@@ -262,11 +261,48 @@ variable	:
 ;
 expression	:	
  		'(' expression ')' { $$ = $2; }
- 	|	expression binary_op expression %prec OP { 
-			$$ = createNode(NODE, $2); 
+
+ 	|	expression PLUS expression { 
+			$$ = createNode(NODE, "+"); 
 			addChildToNode($$, $1);
 			addChildToNode($$, $3);
 		}
+	|	expression MOINS expression { 
+			$$ = createNode(NODE, "-"); 
+			addChildToNode($$, $1);
+			addChildToNode($$, $3);
+		}			
+	|	expression MUL expression { 
+			$$ = createNode(NODE, "*"); 
+			addChildToNode($$, $1);
+			addChildToNode($$, $3);
+		}
+	|	expression DIV expression { 
+			$$ = createNode(NODE, "/"); 
+			addChildToNode($$, $1);
+			addChildToNode($$, $3);
+		}
+	|	expression LSHIFT expression { 
+			$$ = createNode(NODE, "<<"); 
+			addChildToNode($$, $1);
+			addChildToNode($$, $3);
+		}
+	|	expression RSHIFT expression { 
+			$$ = createNode(NODE, ">>"); 
+			addChildToNode($$, $1);
+			addChildToNode($$, $3);
+		}
+	|	expression BAND expression { 
+			$$ = createNode(NODE, "&"); 
+			addChildToNode($$, $1);
+			addChildToNode($$, $3);
+		}
+	|	expression BOR expression { 
+			$$ = createNode(NODE, "|"); 
+			addChildToNode($$, $1);
+			addChildToNode($$, $3);
+		}
+
  	|	MOINS expression { 
 			$$ = createNode(NODE, "-");
 			addChildToNode($$, $2); 
@@ -316,16 +352,6 @@ condition	:
 			addChildToNode($$, $1);
 			addChildToNode($$, $3);
 		}
-;
-binary_op	:	
- 		PLUS { $$ = "+"; }
- 	|   MOINS { $$ = "-"; }
- 	|	MUL { $$ = "*"; }
- 	|	DIV { $$ = "/"; }
- 	|   LSHIFT { $$ = "<<"; }
- 	|   RSHIFT { $$ = ">>"; }
- 	|	BAND { $$ = "&"; }
- 	|	BOR { $$ = "|"; }
 ;
 binary_rel	:	
  		LAND { $$ = "&&"; }

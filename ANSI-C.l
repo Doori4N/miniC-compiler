@@ -10,8 +10,6 @@ C                       \/\*(.|[\n\t\r])*\*\/
     #include "table_symbole.h"
     #include "memory.h"
     #include "y.tab.h"
-    extern TableStack *top;
-    extern void printStack(TableStack *top);
 %}
 
 %%

@@ -7,7 +7,7 @@ int test(int z,int w,int y) {
 }
 
 int main(int z) {
-  int a;
-  a = printd(1);
+  int a,toto,x,y,t;
+  toto = x*y - z /t *6;
   return 3;
 }

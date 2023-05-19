@@ -4,13 +4,13 @@ TESTS := $(wildcard $(TESTS_DIR)/*.c)
 all: miniC
 
 miniC: lex.yy.c y.tab.c 
-	gcc lex.yy.c y.tab.c memory.c table_symbole.c -o miniC
+	gcc lex.yy.c y.tab.c memory.c table_symbole.c -o miniC -lfl
 
 lex.yy.c: ANSI-C.l
 	lex ANSI-C.l
 
 y.tab.c: miniC.y
-	yacc -d miniC.y
+	yacc -d miniC.y 
 
 test: miniC
 	@for testfile in $(TESTS); do \
@@ -22,7 +22,7 @@ test: miniC
 		fi \
 	done
 start: miniC
-	./miniC < Tests/switch.c
+	./miniC < Tests/variables.c
 	dot -Tpdf ex.dot -o ex.pdf
 
 clean:
