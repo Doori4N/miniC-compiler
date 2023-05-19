@@ -1,0 +1,69 @@
+digraph program {
+	node_33 [label="main, int" shape="invtrapezium" color=blue]
+	node_34 [label="BLOC" shape="ellipse" color=black]
+	node_2 [label=":=" shape="ellipse" color=black]
+	node_0 [label="i" shape="ellipse" color=black]
+	node_2 -> node_0
+	node_1 [label="3" shape="ellipse" color=black]
+	node_2 -> node_1
+	node_34 -> node_2
+	node_32 [label="SWITCH" shape="ellipse" color=black]
+	node_3 [label="i" shape="ellipse" color=black]
+	node_32 -> node_3
+	node_6 [label="CASE" shape="ellipse" color=black]
+	node_7 [label="0" shape="ellipse" color=black]
+	node_6 -> node_7
+	node_5 [label="printd" shape="septagon" color=black]
+	node_4 [label="0" shape="ellipse" color=black]
+	node_5 -> node_4
+	node_6 -> node_5
+	node_8 [label="BREAK" shape="box" color=black]
+	node_6 -> node_8
+	node_32 -> node_6
+	node_11 [label="CASE" shape="ellipse" color=black]
+	node_12 [label="1" shape="ellipse" color=black]
+	node_11 -> node_12
+	node_10 [label="printd" shape="septagon" color=black]
+	node_9 [label="1" shape="ellipse" color=black]
+	node_10 -> node_9
+	node_11 -> node_10
+	node_13 [label="BREAK" shape="box" color=black]
+	node_11 -> node_13
+	node_32 -> node_11
+	node_16 [label="CASE" shape="ellipse" color=black]
+	node_17 [label="2" shape="ellipse" color=black]
+	node_16 -> node_17
+	node_15 [label="printd" shape="septagon" color=black]
+	node_14 [label="2" shape="ellipse" color=black]
+	node_15 -> node_14
+	node_16 -> node_15
+	node_18 [label="BREAK" shape="box" color=black]
+	node_16 -> node_18
+	node_32 -> node_16
+	node_21 [label="CASE" shape="ellipse" color=black]
+	node_22 [label="3" shape="ellipse" color=black]
+	node_21 -> node_22
+	node_20 [label="printd" shape="septagon" color=black]
+	node_19 [label="3" shape="ellipse" color=black]
+	node_20 -> node_19
+	node_21 -> node_20
+	node_32 -> node_21
+	node_25 [label="CASE" shape="ellipse" color=black]
+	node_26 [label="4" shape="ellipse" color=black]
+	node_25 -> node_26
+	node_24 [label="printd" shape="septagon" color=black]
+	node_23 [label="4" shape="ellipse" color=black]
+	node_24 -> node_23
+	node_25 -> node_24
+	node_32 -> node_25
+	node_30 [label="DEFAULT" shape="ellipse" color=black]
+	node_29 [label="printd" shape="septagon" color=black]
+	node_28 [label="-" shape="ellipse" color=black]
+	node_27 [label="1" shape="ellipse" color=black]
+	node_28 -> node_27
+	node_29 -> node_28
+	node_30 -> node_29
+	node_32 -> node_30
+	node_34 -> node_32
+	node_33 -> node_34
+}

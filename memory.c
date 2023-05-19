@@ -10,7 +10,6 @@ int* ptr_id = &id;
 
 int checkCaseValue(int capacity, int size, char **array, char *name){
 	for (int i = 0; i < size; i++){
-		printf("%s = %s ?\n", array[i], name);
 		if(strcmp(array[i], name) == 0) yyerror("Error! Duplicate case value");
 	}
 	if(size == capacity){
