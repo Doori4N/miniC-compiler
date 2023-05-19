@@ -187,6 +187,7 @@ selection	:
 		}
  	|	CASE CONSTANTE ':' instruction { 
 			$$ = createNode(CASE_NODE, "CASE");
+			addChildToNode($$, createNode(NODE, $2));
 			addChildToNode($$, $4);
 		}
  	|	DEFAULT ':' instruction { 
