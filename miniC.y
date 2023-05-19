@@ -96,8 +96,8 @@ fonction		:
 			char *label;
 			label = (char*) malloc(strlen($2) + strlen(type_tToString($1)) + 3);	 
 			sprintf(label, "%s, %s", $2, type_tToString($1));
-
 			$$ = createNode(FUN_NODE, label);
+			// free(label);
 			if (len_children_list($9) > 1) {
 				node *bloc = createNode(BLOC_NODE, "BLOC");
 				bloc->list = $9;//la liste d'instruction est la liste des fils du bloc
@@ -229,8 +229,7 @@ bloc	:
 ;
 appel	:	
  		IDENTIFICATEUR '(' liste_expressions ')' ';' {
-			//verifier que id est une fonction
-			int flag = isCallable(top, $1, $3);
+			int flag = isCallable(top, $1, $3, 1);
             checkFlag(flag);
 
 			$$ = createNode(FUN_CALL_NODE, $1);
@@ -244,8 +243,11 @@ variable	:
 			sprintf(label, "Error! Variable %s is never defined", $1);
 
 			Symbol *_symbol = lookup(top, $1);
-			if(_symbol == NULL) yyerror(label);
-			else if (_symbol->type == TYPE_ARR) {
+			if(_symbol == NULL){
+				yyerror(label);
+				free(label);
+			}
+			else if (_symbol->type == TYPE_ARR){
 				$$ = createNode(ARR_NODE, "TAB");
 				addChildToNode($$, createNode(NODE, $1));
 			}
@@ -280,7 +282,7 @@ expression	:
 			$$ = $1; 
 		}
  	|	IDENTIFICATEUR '(' liste_expressions ')' {
-			int flag = isCallable(top, $1, $3);
+			int flag = isCallable(top, $1, $3, 0);
             checkFlag(flag);
 
 			$$ = createNode(FUN_CALL_NODE, $1);

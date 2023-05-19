@@ -105,11 +105,12 @@ int len_children_list(children_list *list){
 }
 
 void createFile(node_list* list){
+	node_list *temp_list = list;
 	FILE* fd = fopen("ex.dot", "w");
 	fprintf(fd, "digraph program {\n");
-	while(list != NULL){
-		writeNode(list->node, fd);
-		list = list->next;
+	while(temp_list != NULL){
+		writeNode(temp_list->node, fd);
+		temp_list = temp_list->next;
 	}
 	fprintf(fd, "}");
 }
@@ -139,12 +140,13 @@ void writeNode(node *_node, FILE *fd){
 			break;
 	}
 	//affiche les nodes fils
-	if(_node->list != NULL){
+	children_list *temp_list = _node->list;
+	if(temp_list != NULL){
 		do{
-			writeNode(_node->list->child, fd);
-			writeLink(_node->id, _node->list->child->id, fd);
-			_node->list = _node->list->next_child;
-		}while(_node->list != NULL);
+			writeNode(temp_list->child, fd);
+			writeLink(_node->id, temp_list->child->id, fd);
+			temp_list = temp_list->next_child;
+		}while(temp_list != NULL);
 	}
 }
 
@@ -154,4 +156,30 @@ void writeNodeInfo(char* label, char* shape, char* color, int id, FILE* fd){
 
 void writeLink(int id1, int id2, FILE*fd){
 	fprintf(fd, "\tnode_%d -> node_%d\n", id1, id2);
+}
+
+void freeNode(node *_node){
+	printf("freeNode: free du nom %s\n", _node->name);
+	// free(_node->name);
+	freeChildList(_node->list);
+	printf("freeNode: free de la node\n");
+	free(_node);	
+}
+
+void freeChildList(children_list *list){
+	if(list != NULL){
+		freeNode(list->child);
+		freeChildList(list->next_child);
+		printf("freeChildList: free de childlist\n");
+		free(list);
+	}
+}
+
+void freeNodeList(node_list *list){
+	if(list != NULL){
+		freeNode(list->node);
+		freeNodeList(list->next);
+		printf("freeNodeList: free de nodelist\n");
+		free(list);
+	}
 }

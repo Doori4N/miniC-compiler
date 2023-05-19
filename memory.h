@@ -35,6 +35,7 @@ typedef struct _node_list{
     struct _node_list *next;
 } node_list;
 
+
 /**
  * Créer le fichier DOT
  * @param list liste de node (arbre abstrait)
@@ -58,9 +59,11 @@ node_list* addNodeToList(node_list *list1, node_list *list2);
 node_list* createNodeList(node *_node);
 
 void checkSwitchSyntax(children_list *list);
-
 void writeNode(node *_node, FILE *fd);
 void writeNodeInfo(char *label, char *shape, char *color, int id, FILE *fd);
 void writeLink(int id1, int id2, FILE *fd);
 
+void freeNode(node *_node);
+void freeChildList(children_list *list);
+void freeNodeList(node_list *list);
 #endif

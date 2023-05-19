@@ -128,11 +128,14 @@ char* type_tToString(type_t type){
 	return "int";
 }
 
-int isCallable(TableStack* stack, char* name,children_list* list){
+int isCallable(TableStack* stack, char* name,children_list* list, int canBeVoid){
     int flag = FUNCTION_UNDEFINED;
     Symbol* symbol = stack->symbol;
     while(symbol != NULL){
         if(strcmp(symbol->name, name) == 0 && symbol->type == TYPE_FUN){
+            if(symbol->s_struct->function->type == TYPE_VOID && canBeVoid == 0){
+                return FUNCTION_VOID;
+            }
             if(symbol->s_struct->function->nb_param == len_children_list(list)){
                 return FUNCTION_OK;
             }
@@ -142,10 +145,9 @@ int isCallable(TableStack* stack, char* name,children_list* list){
             return FUNCTION_OK;
         }
         symbol = symbol->next;
-        
     }
     if(stack->next != NULL)
-        return isCallable(stack->next, name,list);
+        return isCallable(stack->next, name,list, canBeVoid);
     return flag;
 }
 
@@ -203,6 +205,9 @@ void checkFlag(int flag){
             break;
         case FUNCTION_BAD_NB_ARGS:
             yyerror("Error! Bad number of arguments");
+            break;
+        case FUNCTION_VOID:
+            yyerror("Error! Invalid use of void expression");
             break;
         case VAR_UNDEFINED:
             yyerror("Error! Variable not defined");
