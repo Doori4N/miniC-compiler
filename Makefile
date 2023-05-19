@@ -17,14 +17,19 @@ test: miniC
 		echo "Running test: $$testfile"; \
 		if ./miniC < $$testfile; then \
 			echo -e "\033[0;32mTest : $$testfile OK\n\033[0m"; \
+			dot -Tpdf ex.dot -o pdf/$$testfile.pdf; \
+			mv ex.dot dot/$$testfile.dot; \
+			echo -e "\033[0;32mPDF generated: $$testfile.pdf\n\033[0m"; \
 		else \
 			echo -e "\033[31;1mTest : $$testfile failed\n\033[0m"; \
 		fi \
 	done
+
 start: miniC
-	./miniC < Tests/variables.c
+	./miniC < Tests/add.c
 	dot -Tpdf ex.dot -o ex.pdf
 
 clean:
-	rm -f lex.yy.c y.tab.c y.tab.h miniC
+	rm -f lex.yy.c y.tab.c y.tab.h miniC 
+	rm -f dot/Tests/*.dot pdf/Tests/*.pdf
 	clear
