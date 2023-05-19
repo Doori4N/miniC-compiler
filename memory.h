@@ -59,6 +59,8 @@ node_list* addNodeToList(node_list *list1, node_list *list2);
 node_list* createNodeList(node *_node);
 
 void checkSwitchSyntax(children_list *list);
+int checkCaseValue(int capacity, int size, char **array, char *name);
+
 void writeNode(node *_node, FILE *fd);
 void writeNodeInfo(char *label, char *shape, char *color, int id, FILE *fd);
 void writeLink(int id1, int id2, FILE *fd);

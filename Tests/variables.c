@@ -31,6 +31,9 @@ int main() {
           case 3434344:
             switch (c[1])
             {
+            case 3434345:
+              c[34] = 1;
+              break;
             case 3434344:
               c[34] = 1;
               break;
@@ -38,7 +41,9 @@ int main() {
               break;
             }
             break;
-          case 3434344:
+          case 3434345:
+            break;
+          default:
             break;
           }
           

@@ -8,14 +8,23 @@ extern int yyerror(char *s);
 int id = 0;
 int* ptr_id = &id;
 
-
-
+int checkCaseValue(int capacity, int size, char **array, char *name){
+	for (int i = 0; i < size; i++){
+		printf("%s = %s ?\n", array[i], name);
+		if(strcmp(array[i], name) == 0) yyerror("Error! Duplicate case value");
+	}
+	if(size == capacity){
+		capacity = (capacity == 0) ? 1 : capacity * 2;
+		array = realloc(array, capacity * sizeof(char*));
+	}
+	array[size] = name;
+	return capacity;
+}
 
 void checkSwitchSyntax(children_list *list){
-
-	char **array = NULL;
-	size_t size = 0;
-	size_t capacity = 0;
+	char **array = malloc(sizeof(char*));
+	int size = 0;
+	int capacity = 0;
 
 	children_list *curr_last_case = NULL;
 	int isDefaultDefine = 0;
@@ -29,16 +38,7 @@ void checkSwitchSyntax(children_list *list){
 			}
 		}
 		else if(list->child->type == CASE_NODE){
-			for (int i = 0; i < size; i++){
-				if(strcmp(array[i], list->child->name) == 0){
-					yyerror("Error! Duplicate case value");
-				}
-			}
-			if(size == capacity){
-				capacity = (capacity == 0) ? 1 : capacity * 2;
-				array = realloc(array, capacity * sizeof(char*));
-			}
-			array[size] = list->child->name;
+			capacity = checkCaseValue(capacity, size, array, list->child->list->child->name);
 			size++;
 
 			curr_last_case = list;
@@ -63,22 +63,10 @@ void checkSwitchSyntax(children_list *list){
 		list->next_child = NULL;
 		addChildToList(curr_last_case->child->list, list);
 		list = curr_last_case->next_child;
-	}else {
-		for (int i = 0; i < size; i++){
-			if(strcmp(array[i], list->child->name) == 0){
-				yyerror("Error! Duplicate case value");
-			}
-		}
-		if(size == capacity){
-			capacity = (capacity == 0) ? 1 : capacity * 2;
-			array = realloc(array, capacity * sizeof(char*));
-		}
-		array[size] = list->child->name;
-		size++;
-	}
+	}else checkCaseValue(capacity, size, array, list->child->list->child->name);
+
 	free(array);
 	array = NULL;
-	
 }
 
 node_list* addNodeToList(node_list* list1, node_list* list2){
