@@ -38,7 +38,7 @@ int main() {
               break;
             }
             break;
-          default:
+          case 3434344:
             break;
           }
           

@@ -8,12 +8,20 @@ extern int yyerror(char *s);
 int id = 0;
 int* ptr_id = &id;
 
+
+
+
 void checkSwitchSyntax(children_list *list){
+
+	char **array = NULL;
+	size_t size = 0;
+	size_t capacity = 0;
+
 	children_list *curr_last_case = NULL;
 	int isDefaultDefine = 0;
 	while(list->next_child != NULL){
 		if(list->child->type == DEFAULT_NODE){
-			if(isDefaultDefine == 1) yyerror("error: multiple default labels in one switch");
+			if(isDefaultDefine == 1) yyerror("Error! Multiple default labels in one switch");
 			else {
 				isDefaultDefine = 1;
 				curr_last_case = list;
@@ -21,6 +29,18 @@ void checkSwitchSyntax(children_list *list){
 			}
 		}
 		else if(list->child->type == CASE_NODE){
+			for (int i = 0; i < size; i++){
+				if(strcmp(array[i], list->child->name) == 0){
+					yyerror("Error! Duplicate case value");
+				}
+			}
+			if(size == capacity){
+				capacity = (capacity == 0) ? 1 : capacity * 2;
+				array = realloc(array, capacity * sizeof(char*));
+			}
+			array[size] = list->child->name;
+			size++;
+
 			curr_last_case = list;
 			list = list->next_child;
 		} 
@@ -43,7 +63,22 @@ void checkSwitchSyntax(children_list *list){
 		list->next_child = NULL;
 		addChildToList(curr_last_case->child->list, list);
 		list = curr_last_case->next_child;
+	}else {
+		for (int i = 0; i < size; i++){
+			if(strcmp(array[i], list->child->name) == 0){
+				yyerror("Error! Duplicate case value");
+			}
+		}
+		if(size == capacity){
+			capacity = (capacity == 0) ? 1 : capacity * 2;
+			array = realloc(array, capacity * sizeof(char*));
+		}
+		array[size] = list->child->name;
+		size++;
 	}
+	free(array);
+	array = NULL;
+	
 }
 
 node_list* addNodeToList(node_list* list1, node_list* list2){
