@@ -41,7 +41,7 @@ Attention, les tests seront uniquement réalisés s'ils se trouvent dans le rép
 
 
 ## Remerciements
-Merci à notre professeur de compilation Mr. Sid TOUATI.
+Merci à notre professeur de compilation Pr. Sid TOUATI.
 
 
 ## Réalisé par :
