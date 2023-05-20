@@ -13,19 +13,19 @@ Extraire l'archive du projet de la façon suivante :
 Une fois extrait placez-vous à l'intérieur du dossier et exécuter :
 
 ```
-    make
+  make
 ```
 ## Utilisation/Examples
 
 Vous pouvez maintenant compiler un fichier miniC :
 ```
-./miniC < MonFichier.c
+  ./miniC < MonFichier.c
 ```
 Le programme va alors créer un fichier ex.dot et ex.pdf qui correspond au programme donné.
 
 Pour supprimer les fichiers indésirables vous pouvez utiliser :
 ```
-make clean
+  make clean
 ```
 Cela supprimera les fichiers lex.yy.c y.tab.c y.tab.h ainsi que l'exécutable miniC.
 De plus cela va vider les dossiers pdf/Tests/ et dot/Tests/ .
