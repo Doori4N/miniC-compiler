@@ -17,11 +17,17 @@ Une fois extrait placez-vous à l'intérieur du dossier et exécuter :
 ```
 ## Utilisation/Examples
 
-Vous pouvez maintenant compiler un fichier miniC :
+Vous pouvez maintenant compiler un fichier miniC et le convertir en pdf:
 ```
   ./miniC < MonFichier.c
+  dot -Tpdf ex.dot -o ex.pdf
 ```
 Le programme va alors créer un fichier ex.dot et ex.pdf qui correspond au programme donné.
+Vous pouvez aussi utiliser :
+```
+  make start file=fichier.c
+```
+Vous pouvez alors retrouver les résultats dans : dot/ex.dot et pdf/ex.pdf
 
 Pour supprimer les fichiers indésirables vous pouvez utiliser :
 ```
