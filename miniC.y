@@ -46,7 +46,7 @@
 
 %%
 programme	:	
- 		liste_declarations liste_fonctions { createFile($2); }
+ 		liste_declarations liste_fonctions { createFile($2); freeNodeList($2); freeStack(); }
 ;
 liste_declarations	:	
 		liste_declarations declaration
@@ -82,14 +82,14 @@ declarateur		:
 				$$->s_struct = createArrStruct();
 			}
 			$$->s_struct->array->dimension++;
-		}
+		}	
 ;
 fonction		:	
  		type IDENTIFICATEUR '(' liste_parms ')' '{' liste_declarations { top->symbol = addSymbol(createSymbol($2, TYPE_FUN, createFunStruct($1, $4->symbol)), top->symbol); } liste_instructions '}' { 
 			pop();//supprime la table de symbole en haut de la pile
 			TableStack *liste_parms = pop();//supprime le sommet de la pile (liste_parms)
 
-			if(isFunctionDefined(top, $2)) yyerror("Error! Function already defined");
+			if(isAlreadyDefined(top, $2) != NULL) yyerror("Error! name already used");
 
 			top->symbol = addSymbol(createSymbol($2, TYPE_FUN, createFunStruct($1, liste_parms->symbol)), top->symbol); //ajoute la fonction à la liste du bloc parent
 			char *label;
@@ -105,7 +105,7 @@ fonction		:
 		}
  	|	EXTERN type IDENTIFICATEUR '(' liste_parms ')' ';' {
 			TableStack *liste_parms = pop();//supprime le sommet de la pile (liste_parms)
-			if(isFunctionDefined(top, $3)) yyerror("Error! Extern function already defined");
+			if(isAlreadyDefined(top, $3) != NULL) yyerror("Error! name already used");
 			top->symbol = addSymbol(createSymbol($3, TYPE_FUN, createFunStruct($2, liste_parms->symbol)), top->symbol); //ajoute le symbole au sommet de la stack
 			$$ = NULL;
 		}
@@ -220,7 +220,7 @@ bloc	:
  		'{' liste_declarations liste_instructions '}' { 
 			pop(); 
 			if($3 == NULL) $$ = NULL;
-			else if(len_children_list($3) == 1) $$ = $3->child;//ajouter un free de la liste !
+			else if(len_children_list($3) == 1) $$ = $3->child;
 			else{
 				$$ = createNode(BLOC_NODE, "BLOC");
 				$$->list = $3;

@@ -28,6 +28,7 @@ void checkSwitchSyntax(children_list *list){
 	children_list *curr_last_case = NULL;
 	int isDefaultDefine = 0;
 	while(list->next_child != NULL){
+		//si c'est une node DEFAULT -> verifie que DEFAULT n'est pas déjà définie
 		if(list->child->type == DEFAULT_NODE){
 			if(isDefaultDefine == 1) yyerror("Error! Multiple default labels in one switch");
 			else {
@@ -36,6 +37,7 @@ void checkSwitchSyntax(children_list *list){
 				list = list->next_child;
 			}
 		}
+		//si c'est une node CASE -> verifie que la valeur du CASE n'est pas déjà utilisée
 		else if(list->child->type == CASE_NODE){
 			capacity = checkCaseValue(capacity, size, array, list->child->list->child->name);
 			size++;
@@ -43,13 +45,19 @@ void checkSwitchSyntax(children_list *list){
 			curr_last_case = list;
 			list = list->next_child;
 		} 
+		//si c'est une autre node -> ajoute la node au dernier CASE
 		else{
-			curr_last_case->next_child = list->next_child;
-			list->next_child = NULL;
-			addChildToList(curr_last_case->child->list, list);
-			list = curr_last_case->next_child;
+			if(curr_last_case != NULL){
+				curr_last_case->next_child = list->next_child;
+				list->next_child = NULL;
+				addChildToList(curr_last_case->child->list, list);
+				list = curr_last_case->next_child;
+			}else{
+				list = list->next_child;
+			}
 		}
 	}
+	//si c'est une node DEFAULT -> verifie que DEFAULT n'est pas déjà définie
 	if(list->child->type == DEFAULT_NODE){
 		if(isDefaultDefine == 1) yyerror("error: multiple default labels in one switch");
 		else {
@@ -57,12 +65,16 @@ void checkSwitchSyntax(children_list *list){
 			curr_last_case = list;
 			list = list->next_child;
 		}
-	}else if(list->child->type != CASE_NODE){
+	}
+	//si c'est une autre node -> ajoute la node au dernier CASE
+	else if(list->child->type != CASE_NODE){
 		curr_last_case->next_child = list->next_child;
 		list->next_child = NULL;
 		addChildToList(curr_last_case->child->list, list);
 		list = curr_last_case->next_child;
-	}else checkCaseValue(capacity, size, array, list->child->list->child->name);
+	}
+	//si c'est une node CASE -> verifie que la valeur du CASE n'est pas déjà utilisée
+	else checkCaseValue(capacity, size, array, list->child->list->child->name);
 
 	free(array);
 	array = NULL;
@@ -138,6 +150,7 @@ void createFile(node_list* list){
 }
 
 void writeNode(node *_node, FILE *fd){
+	//affiche la node dans le fichier
 	switch(_node->type){
 		case FUN_NODE:
 			writeNodeInfo(_node->name, "invtrapezium", "blue", _node->id, fd);
@@ -161,7 +174,7 @@ void writeNode(node *_node, FILE *fd){
 			writeNodeInfo(_node->name, "ellipse", "black", _node->id, fd);
 			break;
 	}
-	//affiche les nodes fils
+	//affiche les nodes fils dans le fichier
 	children_list *temp_list = _node->list;
 	if(temp_list != NULL){
 		do{
@@ -181,18 +194,16 @@ void writeLink(int id1, int id2, FILE*fd){
 }
 
 void freeNode(node *_node){
-	printf("freeNode: free du nom %s\n", _node->name);
-	// free(_node->name);
-	freeChildList(_node->list);
-	printf("freeNode: free de la node\n");
-	free(_node);	
+	if(_node != NULL){
+		freeChildList(_node->list);
+		free(_node);
+	}
 }
 
 void freeChildList(children_list *list){
 	if(list != NULL){
 		freeNode(list->child);
 		freeChildList(list->next_child);
-		printf("freeChildList: free de childlist\n");
 		free(list);
 	}
 }
@@ -201,7 +212,6 @@ void freeNodeList(node_list *list){
 	if(list != NULL){
 		freeNode(list->node);
 		freeNodeList(list->next);
-		printf("freeNodeList: free de nodelist\n");
 		free(list);
 	}
 }

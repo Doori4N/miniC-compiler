@@ -50,22 +50,17 @@ void freeSymbols(Symbol* symbol1) {
     while(symbol1 != NULL) {
         Symbol* temp = symbol1;
         symbol1 = symbol1->next;
-        printf("free de : %s\n", temp->name);
         free(temp->name);
 		
         if(temp->s_struct != NULL) { 
-			printf("type : %d\n", temp->type);
             switch(temp->type) {
                 case TYPE_ARR:
-					printf("Free du tableau\n");
                     free(temp->s_struct->array); 
                     break;
                 case TYPE_FUN:
-					printf("Free de la fonction\n");
                     free(temp->s_struct->function);
                     break;
                 default:
-					printf("Erreur de type !\n");
                     break;
             }
             free(temp->s_struct);
@@ -168,21 +163,6 @@ Symbol* lookup(TableStack *stack, char *name){
     if(stack->next != NULL) return lookup(stack->next, name);
     return NULL;
 }
-
-int isFunctionDefined(TableStack* stack, char* name){
-    Symbol* symbol = stack->symbol;
-    while(symbol != NULL){
-        if(strcmp(symbol->name, name) == 0 && symbol->type == TYPE_FUN){
-            return 1;
-        }
-        symbol = symbol->next;
-    }
-    if(stack->next != NULL)
-        return isFunctionDefined(stack->next, name);
-
-    return 0;
-}
-
 
 int checkArray(TableStack* stack, node *var, node *expr){
     int flag = ARRAY_UNDEFINED;
