@@ -47,7 +47,7 @@ Merci à notre professeur de compilation Pr. Sid TOUATI.
 ## Réalisé par :
 
 - [Quentin](https://github.com/Moustik06)
-- [Dorian](https://https://github.com/Doori4N)
+- [Dorian](https://github.com/Doori4N)
 
 
 
