@@ -12,7 +12,7 @@ create_directories:
 	fi
 
 miniC: lex.yy.c y.tab.c 
-	gcc lex.yy.c y.tab.c memory.c table_symbole.c -o miniC -ll
+	gcc lex.yy.c y.tab.c memory.c table_symbole.c -o miniC -lfl
 
 lex.yy.c: ANSI-C.l
 	lex ANSI-C.l
