@@ -164,20 +164,6 @@ Symbol* lookup(TableStack *stack, char *name){
     return NULL;
 }
 
-int checkArray(TableStack* stack, node *var, node *expr){
-    int flag = ARRAY_UNDEFINED;
-    Symbol* symbol = stack->symbol;
-
-    while(symbol !=NULL){
-        if (strcmp(symbol->name,var->name)==0 && symbol->type == TYPE_ARR){
-            printf("big test\n");
-            return ARRAY_OK;
-        } 
-    }
-
-    return flag;
-}
-
 void checkFlag(int flag){
     switch(flag){
         case FUNCTION_UNDEFINED:

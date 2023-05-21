@@ -56,7 +56,6 @@ void freeOneStack(TableStack* stack);
 int isCallable(TableStack* stack, char* name,children_list* list,int canBeVoid);
 Symbol* isAlreadyDefined(TableStack* stack, char* name);
 Symbol* lookup(TableStack *stack, char *name);
-int checkArray(TableStack* stack, node *var, node *expr);
 void checkFlag(int flag);
 
 //FONCTIONS POUR DEBUG
