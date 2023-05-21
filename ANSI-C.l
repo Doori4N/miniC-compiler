@@ -38,16 +38,16 @@ C                       \/\*(.|[\n\t\r])*\*\/
 "=="                    { return EQ; }
 "!="                    { return NEQ; }
 "!"                     { return NOT; }
-"&&"                    { return BAND; }
-"||"                    { return BOR; }
+"&&"                    { return LAND; }
+"||"                    { return LOR; }
 "+"                     { return PLUS; }
 "-"                     { return MOINS; }
 "*"                     { return MUL; }
 "/"                     { return DIV; }
 "<<"                    { return LSHIFT; }
 ">>"                    { return RSHIFT; }
-"&"                     { return LAND; }
-"|"                     { return LOR; }
+"&"                     { return BAND; }
+"|"                     { return BOR; }
 
 {C}                     ;
 [ \t\v\n\f]             ;
